@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Editores
+.idea/
+.vscode/
+*.iml
+
+# Dependências / build (quando virar app nativo)
+node_modules/
+build/
+.gradle/
+local.properties
+*.log

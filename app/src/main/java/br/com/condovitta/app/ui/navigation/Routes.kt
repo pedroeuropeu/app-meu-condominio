@@ -92,3 +92,10 @@ object SoonCatalog {
 @Serializable data object BloqueadosRoute
 @Serializable data class EncomendaDetalhe(val id: Long)
 @Serializable data object NovaEncomendaRoute
+
+/* Morador (fase 2) */
+@Serializable data object AppVisitantes
+@Serializable data object NovaAutorizacaoRoute
+@Serializable data class AutorizacaoDetalhe(val id: Long)
+@Serializable data object AppEncomendas
+@Serializable data object AppAvisos

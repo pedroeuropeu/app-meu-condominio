@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fotos tiradas pela câmera do sistema (encomendas): só a pasta temporária do cache -->
+<!-- Arquivos temporários no cache: fotos da câmera (encomendas) e PDFs baixados (boletos) -->
 <paths>
     <cache-path name="fotos" path="fotos/" />
+    <cache-path name="pdfs" path="pdfs/" />
 </paths>

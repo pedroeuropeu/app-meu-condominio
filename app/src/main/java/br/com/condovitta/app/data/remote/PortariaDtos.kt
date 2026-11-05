@@ -204,7 +204,7 @@ fun EncomendaDto.toDomain() = Encomenda(
     retirada = situacao == "RETIRADA", recebidaEm = dateTime(recebidaEm), recebidaPor = recebidaPor, avisos = avisos,
     ultimoAvisoEm = dateTime(ultimoAvisoEm), retiradaEm = dateTime(retiradaEm), retiradaPor = retiradaPor,
     retiradaDocumento = retiradaDocumento, tipoRetirada = TipoRetirada.entries.firstOrNull { it.name == tipoRetirada },
-    entreguePor = entreguePor, temAssinatura = temAssinatura
+    entreguePor = entreguePor, temAssinatura = temAssinatura, codigo = codigo
 )
 
 fun EncomendasPortariaDto.toDomain() = EncomendasPortaria(aguardando.map { it.toDomain() }, entregues.map { it.toDomain() }, recebidasHoje, entreguesHoje)

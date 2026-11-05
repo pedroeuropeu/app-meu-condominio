@@ -48,6 +48,30 @@ interface PortariaRepository {
     suspend fun fotoEncomenda(id: Long): Outcome<ByteArray?>
 }
 
+/** App do morador: boletos, visitantes, encomendas e avisos da própria unidade. */
+interface MoradorRepository {
+    suspend fun financeiro(): Outcome<Financeiro>
+    suspend fun boletoPdf(id: Long): Outcome<ByteArray>
+    /** QR do Pix em PNG (null quando o boleto não tem Pix) */
+    suspend fun pixQr(id: Long): Outcome<ByteArray?>
+
+    suspend fun visitas(): Outcome<MinhasVisitas>
+    suspend fun autorizar(form: NovaAutorizacao): Outcome<Autorizacao>
+    suspend fun revogar(id: Long): Outcome<Unit>
+    suspend fun reativar(id: Long): Outcome<Autorizacao>
+    suspend fun qrVisitante(id: Long): Outcome<ByteArray?>
+    /** resposta à consulta da portaria ("fulano está aqui") */
+    suspend fun responder(acessoId: Long, liberar: Boolean, recado: String? = null): Outcome<Visita>
+
+    suspend fun encomendas(): Outcome<MinhasEncomendas>
+    suspend fun autorizarRetirada(form: NovoAutorizado): Outcome<AutorizadoEncomenda>
+    suspend fun removerAutorizado(id: Long): Outcome<Unit>
+
+    suspend fun avisos(): Outcome<List<Aviso>>
+    suspend fun marcarLido(id: Long): Outcome<Unit>
+    suspend fun ciente(id: Long): Outcome<Unit>
+}
+
 /** Quem está logado e em quais condomínios. */
 interface ContextRepository {
     suspend fun me(): Outcome<Me>

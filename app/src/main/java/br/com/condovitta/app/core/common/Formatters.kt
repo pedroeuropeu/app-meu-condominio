@@ -12,6 +12,17 @@ object Fmt {
     private val DDMM = DateTimeFormatter.ofPattern("dd/MM", PT)
     private val DDMMYYYY = DateTimeFormatter.ofPattern("dd/MM/yyyy", PT)
 
+    private val BRL = java.text.NumberFormat.getCurrencyInstance(PT)
+    private val MES = DateTimeFormatter.ofPattern("MMMM 'de' yyyy", PT)
+
+    /** "R$ 612,40" */
+    fun money(v: java.math.BigDecimal?): String = v?.let { BRL.format(it).replace('\u00A0', ' ') } ?: "—"
+
+    /** "2026-11" → "Novembro de 2026" */
+    fun competencia(ym: String): String = runCatching { java.time.YearMonth.parse(ym).format(MES).replaceFirstChar { it.uppercase() } }.getOrDefault(ym)
+
+    fun hora(t: java.time.LocalTime?): String = t?.format(HHMM) ?: "—"
+
     fun hora(dt: LocalDateTime?): String = dt?.format(HHMM) ?: "—"
 
     /** "hoje 09:29", "ontem 15:10" ou "30/10 15:10" */

@@ -95,3 +95,51 @@ interface PortariaApi {
     @GET("api/v1/encomendas/{id}/foto")
     suspend fun fotoEncomenda(@Path("id") id: Long): ResponseBody
 }
+
+/** App do morador: BoletoController, VisitanteController, EncomendaController e ComunicadoController. */
+interface MoradorApi {
+    @GET("api/v1/financeiro/morador")
+    suspend fun financeiro(): FinanceiroMoradorDto
+
+    @GET("api/v1/financeiro/morador/boletos/{id}/pdf")
+    suspend fun boletoPdf(@Path("id") id: Long): ResponseBody
+
+    @GET("api/v1/financeiro/morador/boletos/{id}/pix.png")
+    suspend fun pixQr(@Path("id") id: Long): ResponseBody
+
+    @GET("api/v1/visitantes/minhas")
+    suspend fun visitas(): MinhasVisitasDto
+
+    @POST("api/v1/visitantes")
+    suspend fun autorizar(@Body body: AutorizacaoFormDto): AutorizacaoDto
+
+    @POST("api/v1/visitantes/{id}/revogar")
+    suspend fun revogar(@Path("id") id: Long): Response<Unit>
+
+    @POST("api/v1/visitantes/{id}/reativar")
+    suspend fun reativar(@Path("id") id: Long): AutorizacaoDto
+
+    @GET("api/v1/visitantes/{id}/qr")
+    suspend fun qrVisitante(@Path("id") id: Long): ResponseBody
+
+    @POST("api/v1/visitantes/consultas/{acessoId}/responder")
+    suspend fun responder(@Path("acessoId") acessoId: Long, @Body body: RespostaDto): VisitaDto
+
+    @GET("api/v1/encomendas/minhas")
+    suspend fun encomendas(): MinhasEncomendasDto
+
+    @POST("api/v1/encomendas/autorizados")
+    suspend fun autorizarRetirada(@Body body: AutorizadoFormDto): AutorizadoEncomendaDto
+
+    @DELETE("api/v1/encomendas/autorizados/{id}")
+    suspend fun removerAutorizado(@Path("id") id: Long): Response<Unit>
+
+    @GET("api/v1/comunicados/mural")
+    suspend fun mural(): List<MuralDto>
+
+    @POST("api/v1/comunicados/{id}/lido")
+    suspend fun lido(@Path("id") id: Long): Response<Unit>
+
+    @POST("api/v1/comunicados/{id}/ciente")
+    suspend fun ciente(@Path("id") id: Long): Response<Unit>
+}

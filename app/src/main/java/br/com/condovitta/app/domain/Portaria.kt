@@ -108,7 +108,9 @@ data class Encomenda(
     val retiradaDocumento: String?,
     val tipoRetirada: TipoRetirada?,
     val entreguePor: String?,
-    val temAssinatura: Boolean
+    val temAssinatura: Boolean,
+    /** código de retirada: só vem na tela do morador */
+    val codigo: String? = null
 )
 
 data class EncomendasPortaria(val aguardando: List<Encomenda>, val entregues: List<Encomenda>, val recebidasHoje: Long, val entreguesHoje: Long)

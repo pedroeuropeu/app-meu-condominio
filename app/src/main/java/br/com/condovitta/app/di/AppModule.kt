@@ -117,5 +117,9 @@ object NetworkModule {
         retrofit(client).create(br.com.condovitta.app.data.remote.PortariaApi::class.java)
 
     @Provides @Singleton
+    fun moradorApi(@Named("auth") client: OkHttpClient): br.com.condovitta.app.data.remote.MoradorApi =
+        retrofit(client).create(br.com.condovitta.app.data.remote.MoradorApi::class.java)
+
+    @Provides @Singleton
     fun condovittaApi(@Named("auth") client: OkHttpClient): CondovittaApi = retrofit(client).create(CondovittaApi::class.java)
 }

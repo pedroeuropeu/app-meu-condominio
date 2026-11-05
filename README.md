@@ -87,8 +87,8 @@ O app nativo fica em [`app/`](app/), no mesmo padrão do e-Finances. Plano compl
 | Fase | Entrega | Situação |
 |---|---|---|
 | 0 · Fundação | Projeto, flavors, marca, rede/sessão, login (com 2FA), `/me`, escolha de perfil, os dois modos com telas "Em construção", CI | ✅ |
-| 1 · Portaria | Painel do turno, visitantes e acesso, nova visita, bloqueados, encomendas com foto | próxima |
-| 2 · Morador | Início, boletos (Pix, PDF), visitantes, encomendas, avisos | |
+| 1 · Portaria | Painel do turno com busca, visitantes e acesso (liberar/saída/recusar com Desfazer), nova visita, bloqueados, encomendas com foto e entrega com código + assinatura | ✅ |
+| 2 · Morador | Início, boletos (Pix, PDF), visitantes, encomendas, avisos | próxima |
 | 3 · Reservas | Assistente em 4 passos, reservas de hoje, leitor de QR | |
 | 4 · Push e mais | FCM (depende do backend), livro, gás, veículos, minha unidade | |
 | 5 · Loja | Ícone, capturas, AAB assinado, teste interno | |

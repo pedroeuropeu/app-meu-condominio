@@ -85,3 +85,10 @@ object SoonCatalog {
 
     operator fun get(key: String): SoonInfo = all[key] ?: SoonInfo("Em breve", Icons.Rounded.Home, Slate, "Esta parte do app ainda está sendo feita.")
 }
+
+/* Portaria (fase 1) */
+@Serializable data class VisitanteDetalhe(val visitanteId: Long)
+@Serializable data object NovaVisitaRoute
+@Serializable data object BloqueadosRoute
+@Serializable data class EncomendaDetalhe(val id: Long)
+@Serializable data object NovaEncomendaRoute

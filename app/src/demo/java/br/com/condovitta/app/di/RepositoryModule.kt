@@ -14,5 +14,6 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds abstract fun auth(impl: DemoAuthRepository): AuthRepository
+    @Binds abstract fun portaria(impl: br.com.condovitta.app.data.demo.DemoPortariaRepository): br.com.condovitta.app.domain.PortariaRepository
     @Binds abstract fun context(impl: DemoContextRepository): ContextRepository
 }

@@ -86,7 +86,7 @@ no debug com `Authorization` mascarado; R8 no release.
 | Fase | Entrega | Pronto quando |
 |---|---|---|
 | **0 · Fundação** ✅ | Projeto Gradle, flavors, design system da marca, rede/sessão/biometria, login, `/me`, escolha de perfil, navegação dos dois modos com telas "Em construção", CI (GitHub Actions) | `assembleDemoDebug` abre e loga nos dois modos; `local` loga no Keycloak local |
-| **1 · Portaria** | Painel do turno, busca (morador/unidade/placa), visitantes e acesso (liberar/saída/desfazer), nova visita, bloqueados, encomendas (registrar com CameraX → código de retirada, entregar, desfazer) | Porteiro faz o turno inteiro de visitas e encomendas pelo app, e a web reflete |
+| **1 · Portaria** ✅ | Painel do turno, busca (morador/unidade/placa), visitantes e acesso (liberar/saída/desfazer), nova visita, bloqueados, encomendas (registrar com CameraX → código de retirada, entregar, desfazer) | Porteiro faz o turno inteiro de visitas e encomendas pelo app, e a web reflete |
 | **2 · Morador** | Início, boletos (Pix copia-e-cola, QR, PDF), visitantes (pré-autorizar, QR para compartilhar, responder consulta da portaria), encomendas, avisos com ciência | Morador vê e paga o boleto e autoriza visitas sem abrir a web |
 | **3 · Reservas** | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
 | **4 · Push e mais** | FCM (depende do backend), notificações, livro da portaria, gás, veículos, minha unidade | Encomenda registrada vibra no celular do morador |

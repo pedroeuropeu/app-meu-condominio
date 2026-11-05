@@ -8,7 +8,7 @@ Kotlin 2.2 · Jetpack Compose (BOM 2025.07) · Material 3 · Hilt · Navigation 
 kotlinx.serialization · OkHttp 4.12 · Coil · DataStore · Biometric · Timber · JUnit/MockK/Turbine/Truth/MockWebServer.
 `gradle/libs.versions.toml` igual ao do e-Finances. compileSdk/targetSdk 36, minSdk 26, JDK 17.
 Ícone do app: ícone adaptativo a partir do emblema em vetor (`prototype/favicon.svg`), fundo branco.
-Extras deste app: **CameraX** (foto da encomenda/livro), **ML Kit Barcode** (ler QR do visitante — fase 3),
+Extras deste app: **CameraX** (foto da encomenda/livro), **Google Code Scanner** (ler QR do visitante — fase 3; o QR traz o código de 6 dígitos que a busca da portaria já entende),
 **Firebase Messaging** (push — fase 4).
 
 ## 2. Arquitetura
@@ -88,7 +88,7 @@ no debug com `Authorization` mascarado; R8 no release.
 | **0 · Fundação** ✅ | Projeto Gradle, flavors, design system da marca, rede/sessão/biometria, login, `/me`, escolha de perfil, navegação dos dois modos com telas "Em construção", CI (GitHub Actions) | `assembleDemoDebug` abre e loga nos dois modos; `local` loga no Keycloak local |
 | **1 · Portaria** ✅ | Painel do turno, busca (morador/unidade/placa), visitantes e acesso (liberar/saída/desfazer), nova visita, bloqueados, encomendas (registrar com CameraX → código de retirada, entregar, desfazer) | Porteiro faz o turno inteiro de visitas e encomendas pelo app, e a web reflete |
 | **2 · Morador** ✅ | Início, boletos (Pix copia-e-cola, QR, PDF), visitantes (pré-autorizar, QR para compartilhar, responder consulta da portaria), encomendas, avisos com ciência | Morador vê e paga o boleto e autoriza visitas sem abrir a web |
-| **3 · Reservas** | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
+| **3 · Reservas** ✅ | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
 | **4 · Push e mais** | FCM (depende do backend), notificações, livro da portaria, gás, veículos, minha unidade | Encomenda registrada vibra no celular do morador |
 | **5 · Loja** | Ícone, capturas, `store/play-console.md`, teste interno, AAB assinado | Teste interno publicado |
 Depois: chamados, documentos/assinatura, assembleias/plenário, prestação de contas, ocorrências (módulo a módulo).

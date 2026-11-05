@@ -46,6 +46,11 @@
             </intent-filter>
         </activity>
 
+        <!-- baixa o leitor de QR do Play Services junto com o app (sem esperar o primeiro uso na portaria) -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fotos"

@@ -99,3 +99,7 @@ object SoonCatalog {
 @Serializable data class AutorizacaoDetalhe(val id: Long)
 @Serializable data object AppEncomendas
 @Serializable data object AppAvisos
+
+/* Reservas (fase 3) */
+@Serializable data class NovaReservaRoute(val areaId: Long)
+@Serializable data object PortReservasRoute

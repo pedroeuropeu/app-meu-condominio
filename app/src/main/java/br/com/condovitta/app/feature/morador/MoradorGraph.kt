@@ -1,6 +1,5 @@
 package br.com.condovitta.app.feature.morador
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -10,10 +9,8 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
-import br.com.condovitta.app.core.designsystem.SoonContent
 import br.com.condovitta.app.domain.Me
 import br.com.condovitta.app.domain.Perfil
 import br.com.condovitta.app.feature.mais.MaisActions
@@ -30,7 +27,9 @@ import br.com.condovitta.app.ui.navigation.AppReservas
 import br.com.condovitta.app.ui.navigation.AppVisitantes
 import br.com.condovitta.app.ui.navigation.AutorizacaoDetalhe
 import br.com.condovitta.app.ui.navigation.NovaAutorizacaoRoute
-import br.com.condovitta.app.ui.navigation.SoonCatalog
+import br.com.condovitta.app.ui.navigation.NovaReservaRoute
+import br.com.condovitta.app.feature.reservas.NovaReservaScreen
+import br.com.condovitta.app.feature.reservas.ReservasScreen
 import br.com.condovitta.app.ui.soon
 
 /** App do morador (completo): Início, Reservas, Boletos e Mais, nas cores da marca. */
@@ -69,7 +68,7 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger) 
             back = { nav.popBackStack() }
         )
         composable<AppInicio> { InicioScreen(me, perfil, padding, mnav, messenger) }
-        composable<AppReservas> { SoonTab("app/reservas", padding) }
+        composable<AppReservas> { ReservasScreen(padding, onReservar = { nav.navigate(NovaReservaRoute(it)) }) }
         composable<AppBoletos> { BoletosScreen(padding, messenger) }
         composable<AppMais> { MaisScreen(me, perfil, mais, padding, onSoon = mnav.soon) }
         composable<AppVisitantes> { VisitasScreen(mnav) }
@@ -77,11 +76,6 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger) 
         composable<AutorizacaoDetalhe> { AutorizacaoScreen(mnav, perfil.condominioNome, perfil.unidade) }
         composable<AppEncomendas> { EncomendasMoradorScreen(mnav) }
         composable<AppAvisos> { AvisosScreen(mnav) }
+        composable<NovaReservaRoute> { NovaReservaScreen(onBack = { nav.popBackStack() }, onConcluir = { nav.popBackStack() }) }
     }
-}
-
-@Composable
-private fun SoonTab(key: String, padding: PaddingValues) {
-    val info = SoonCatalog[key]
-    SoonContent(info.title, info.icon, info.color, info.description, Modifier, contentPadding = padding)
 }

@@ -24,13 +24,15 @@ import br.com.condovitta.app.ui.navigation.NovaVisitaRoute
 import br.com.condovitta.app.ui.navigation.PortEncomendas
 import br.com.condovitta.app.ui.navigation.PortMais
 import br.com.condovitta.app.ui.navigation.PortPainel
+import br.com.condovitta.app.ui.navigation.PortReservasRoute
+import br.com.condovitta.app.feature.reservas.PortariaReservasScreen
 import br.com.condovitta.app.ui.navigation.PortVisitantes
 import br.com.condovitta.app.ui.navigation.VisitanteDetalhe
 import br.com.condovitta.app.ui.soon
 
 /** Modo Portaria (rápido): Painel, Visitantes, Encomendas e Mais, no acento âmbar. */
 @Composable
-fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions) {
+fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: br.com.condovitta.app.ui.Messenger) {
     ModeShell(
         tag = "modo_portaria",
         tabs = listOf(
@@ -53,10 +55,16 @@ fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions) {
             novaEncomenda = { nav.navigate(NovaEncomendaRoute) },
             abaVisitantes = { tab(PortVisitantes) },
             abaEncomendas = { tab(PortEncomendas) },
-            soon = { key -> if (key == "port/bloqueados") nav.navigate(BloqueadosRoute) else nav.soon(key) },
+            soon = { key ->
+                when (key) {
+                    "port/bloqueados" -> nav.navigate(BloqueadosRoute)
+                    "port/reservas" -> nav.navigate(PortReservasRoute)
+                    else -> nav.soon(key)
+                }
+            },
             back = { nav.popBackStack() }
         )
-        composable<PortPainel> { PainelScreen(me, perfil, padding, pnav) }
+        composable<PortPainel> { PainelScreen(me, perfil, padding, pnav, messenger) }
         composable<PortVisitantes> { VisitantesScreen(padding, pnav) }
         composable<PortEncomendas> { EncomendasScreen(padding, pnav) }
         composable<PortMais> { MaisScreen(me, perfil, mais, padding, onSoon = pnav.soon) }
@@ -65,5 +73,6 @@ fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions) {
         composable<BloqueadosRoute> { BloqueadosScreen(pnav) }
         composable<EncomendaDetalhe> { EncomendaScreen(pnav) }
         composable<NovaEncomendaRoute> { NovaEncomendaScreen(pnav) }
+        composable<PortReservasRoute> { PortariaReservasScreen(onBack = pnav.back) }
     }
 }

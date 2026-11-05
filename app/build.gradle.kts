@@ -165,6 +165,8 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.coil.compose)
     implementation(libs.timber)
+    // leitor de QR do visitante (Google Code Scanner: sem permissão de câmera no app)
+    implementation(libs.play.services.code.scanner)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

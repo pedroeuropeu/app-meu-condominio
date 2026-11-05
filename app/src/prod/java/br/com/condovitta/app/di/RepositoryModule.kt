@@ -16,5 +16,6 @@ abstract class RepositoryModule {
     @Binds abstract fun auth(impl: RemoteAuthRepository): AuthRepository
     @Binds abstract fun portaria(impl: br.com.condovitta.app.data.repository.RemotePortariaRepository): br.com.condovitta.app.domain.PortariaRepository
     @Binds abstract fun morador(impl: br.com.condovitta.app.data.repository.RemoteMoradorRepository): br.com.condovitta.app.domain.MoradorRepository
+    @Binds abstract fun reservas(impl: br.com.condovitta.app.data.repository.RemoteReservasRepository): br.com.condovitta.app.domain.ReservasRepository
     @Binds abstract fun context(impl: RemoteContextRepository): ContextRepository
 }

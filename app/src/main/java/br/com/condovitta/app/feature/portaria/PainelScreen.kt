@@ -25,6 +25,11 @@ import androidx.compose.material.icons.rounded.LocalShipping
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.QrCodeScanner
+import androidx.compose.ui.platform.LocalContext
+import br.com.condovitta.app.core.common.codigoDoQr
+import br.com.condovitta.app.core.common.lerQr
+import br.com.condovitta.app.ui.Messenger
 import androidx.compose.material.icons.rounded.SensorOccupied
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.WaterDrop
@@ -79,7 +84,8 @@ data class PortariaNav(
 
 /** A tela que o porteiro mais usa: busca grande, números do turno, ações de um toque e quem está chegando. */
 @Composable
-fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNav, vm: PainelViewModel = hiltViewModel()) {
+fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNav, messenger: Messenger, vm: PainelViewModel = hiltViewModel()) {
+    val context = LocalContext.current
     val painel by vm.painel.collectAsStateWithLifecycle()
     // o texto fica no próprio campo (síncrono); o ViewModel recebe e busca com atraso
     var query by rememberSaveable { mutableStateOf(vm.query.value) }
@@ -114,7 +120,13 @@ fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNa
                     value = query, onValueChange = ::onQuery,
                     placeholder = { Text("Buscar morador, unidade ou placa…") },
                     leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
-                    trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { onQuery("") }) { Icon(Icons.Rounded.Close, contentDescription = "Limpar") } },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) IconButton(onClick = { onQuery("") }) { Icon(Icons.Rounded.Close, contentDescription = "Limpar") }
+                        else IconButton(onClick = {
+                            // o QR da autorização traz o código de 6 dígitos: vai para a busca, que acha o visitante
+                            lerQr(context, onCodigo = { lido -> onQuery(codigoDoQr(lido) ?: lido.take(40)) }, onErro = { messenger.show(it) })
+                        }, modifier = Modifier.testTag("painel_qr")) { Icon(Icons.Rounded.QrCodeScanner, contentDescription = "Ler QR do visitante") }
+                    },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     shape = RoundedCornerShape(16.dp),

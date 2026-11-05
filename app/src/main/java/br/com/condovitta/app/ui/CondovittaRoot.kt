@@ -126,7 +126,7 @@ fun CondovittaRoot(
                                 onSair = { vm.sair() },
                                 onPassarTurno = { vm.sair(SessionEnd.TURNO_PASSADO) }
                             )
-                            if (perfil.modo == Modo.PORTARIA) PortariaApp(r.me, perfil, actions) else MoradorApp(r.me, perfil, actions, messenger)
+                            if (perfil.modo == Modo.PORTARIA) PortariaApp(r.me, perfil, actions, messenger) else MoradorApp(r.me, perfil, actions, messenger)
                         }
                     }
                 }

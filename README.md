@@ -80,7 +80,36 @@ prototype/
 - `homolog` — homologação.
 - `production` — produção.
 
-## Próximos passos (sugestão)
-Transformar o protótipo em app Android nativo (Kotlin + Jetpack Compose + Material 3), como no e-Finances, ligando
-nas APIs do backend `gestao-condominio`. Plano detalhado em [`docs/PLANO-ANDROID.md`](docs/PLANO-ANDROID.md). Seguir fechando módulos: assinatura de documentos, assembleias/plenário,
-chamados, gás e prestação de contas.
+## App Android (Kotlin + Jetpack Compose)
+O app nativo fica em [`app/`](app/), no mesmo padrão do e-Finances. Plano completo e fases em
+[`docs/PLANO-ANDROID.md`](docs/PLANO-ANDROID.md).
+
+| Fase | Entrega | Situação |
+|---|---|---|
+| 0 · Fundação | Projeto, flavors, marca, rede/sessão, login (com 2FA), `/me`, escolha de perfil, os dois modos com telas "Em construção", CI | ✅ |
+| 1 · Portaria | Painel do turno, visitantes e acesso, nova visita, bloqueados, encomendas com foto | próxima |
+| 2 · Morador | Início, boletos (Pix, PDF), visitantes, encomendas, avisos | |
+| 3 · Reservas | Assistente em 4 passos, reservas de hoje, leitor de QR | |
+| 4 · Push e mais | FCM (depende do backend), livro, gás, veículos, minha unidade | |
+| 5 · Loja | Ícone, capturas, AAB assinado, teste interno | |
+
+### Flavors
+| Flavor | Pacote | Dados |
+|---|---|---|
+| `demo` | `br.com.condovitta.app.demo` | exemplo no aparelho, qualquer senha. E-mail com `portaria` → porteiro; com `sindico` → escolhe o modo; outro → moradora |
+| `local` | `br.com.condovitta.app.local` | `make up` do gestao-condominio (API `8090`, Keycloak `8180`) via `adb reverse` — `scripts/local-dev.sh` |
+| `prod` | `br.com.condovitta.app` | `https://meucondominio.efinances.top/` (troque com `-Pcondovitta.prodUrl=...`) |
+
+```bash
+./gradlew assembleDemoDebug          # APK de demonstração
+./gradlew testDemoDebugUnitTest      # testes unitários
+scripts/local-dev.sh                 # instala o flavor local ligado ao backend desta máquina
+```
+JDK 17+ (o CI usa 21). Emulador: `~/Library/Android/sdk/emulator/emulator -avd efinances_pixel8`.
+
+### Decisões
+- **Portaria em aparelho compartilhado:** sem biometria, sessão longa e **"Passar o turno"** em Mais (sai e deixa o
+  login vazio para o próximo porteiro).
+- **Quem entra em qual modo:** Portaria = papéis que operam a portaria no backend (PORTARIA, SÍNDICO, ADMINISTRAÇÃO);
+  Morador = MORADOR, ou SÍNDICO/CONSELHO com unidade. Mais de um perfil → "Como você quer entrar?", lembrado no aparelho.
+- **Push (FCM):** fase 4 (precisa de endpoints novos no backend).

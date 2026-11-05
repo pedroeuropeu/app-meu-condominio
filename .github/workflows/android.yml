@@ -1,0 +1,36 @@
+name: Android
+
+on:
+  push:
+    branches: [main, develop, homolog, production]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Testes unitários
+        run: ./gradlew testDemoDebugUnitTest testLocalDebugUnitTest testProdDebugUnitTest
+      - name: Lint
+        run: ./gradlew lintProdRelease
+      - name: APKs (demo e prod, debug)
+        run: ./gradlew assembleDemoDebug assembleProdDebug assembleProdRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorios
+          path: |
+            app/build/reports/tests/
+            app/build/reports/lint-results-*.html

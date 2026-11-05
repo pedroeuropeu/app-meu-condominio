@@ -1,0 +1,18 @@
+package br.com.condovitta.app.di
+
+import br.com.condovitta.app.data.demo.DemoAuthRepository
+import br.com.condovitta.app.data.demo.DemoContextRepository
+import br.com.condovitta.app.domain.AuthRepository
+import br.com.condovitta.app.domain.ContextRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+
+/** Flavor demo: dados de exemplo no aparelho, sem servidor. */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+    @Binds abstract fun auth(impl: DemoAuthRepository): AuthRepository
+    @Binds abstract fun context(impl: DemoContextRepository): ContextRepository
+}

@@ -85,7 +85,7 @@ no debug com `Authorization` mascarado; R8 no release.
 ## 6. Fases
 | Fase | Entrega | Pronto quando |
 |---|---|---|
-| **0 · Fundação** | Projeto Gradle, flavors, design system da marca, rede/sessão/biometria, login, `/me`, escolha de perfil, navegação dos dois modos com telas "Em construção", CI (GitHub Actions) | `assembleDemoDebug` abre e loga nos dois modos; `local` loga no Keycloak local |
+| **0 · Fundação** ✅ | Projeto Gradle, flavors, design system da marca, rede/sessão/biometria, login, `/me`, escolha de perfil, navegação dos dois modos com telas "Em construção", CI (GitHub Actions) | `assembleDemoDebug` abre e loga nos dois modos; `local` loga no Keycloak local |
 | **1 · Portaria** | Painel do turno, busca (morador/unidade/placa), visitantes e acesso (liberar/saída/desfazer), nova visita, bloqueados, encomendas (registrar com CameraX → código de retirada, entregar, desfazer) | Porteiro faz o turno inteiro de visitas e encomendas pelo app, e a web reflete |
 | **2 · Morador** | Início, boletos (Pix copia-e-cola, QR, PDF), visitantes (pré-autorizar, QR para compartilhar, responder consulta da portaria), encomendas, avisos com ciência | Morador vê e paga o boleto e autoriza visitas sem abrir a web |
 | **3 · Reservas** | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
@@ -93,9 +93,14 @@ no debug com `Authorization` mascarado; R8 no release.
 | **5 · Loja** | Ícone, capturas, `store/play-console.md`, teste interno, AAB assinado | Teste interno publicado |
 Depois: chamados, documentos/assinatura, assembleias/plenário, prestação de contas, ocorrências (módulo a módulo).
 
-## 7. Decisões em aberto
-- ~~`applicationId`~~ → `br.com.condovitta.app` (definido). Falta o domínio de produção.
-- Idiomas: só pt-BR por enquanto (a web do condomínio é só PT) — deixar o `t("...")` pronto para depois?
-- Portaria em aparelho compartilhado (tablet fixo na guarita): sessão longa, sem biometria, troca de porteiro na
-  passagem de turno?
-- Push (FCM) entra na fase 1 junto com encomendas, ou fica para a fase 4?
+## 7. Decisões
+- `applicationId` → `br.com.condovitta.app`. Produção: `https://meucondominio.efinances.top/` (API + Keycloak em `/auth`),
+  o mesmo domínio do deploy do gestao-condominio; trocável com `-Pcondovitta.prodUrl=...`.
+- Portaria em aparelho compartilhado: **sessão longa, sem biometria e "Passar o turno"** em Mais (decidido em 2026-11-05).
+- Push (FCM): **fase 4**, como no plano (decidido em 2026-11-05).
+- Quem entra na Portaria: os papéis de `PapelEnum.OPERACAO` do backend (PORTARIA, SÍNDICO, ADMINISTRAÇÃO).
+- Idiomas: só pt-BR por enquanto.
+
+### Em aberto
+- Fontes da marca (Lexend nos títulos, Inter no texto): por ora a sans-serif do sistema; falta colocar os `.ttf` em
+  `app/src/main/res/font` (licença OFL, Google Fonts) e apontar `DisplayFamily`/`BodyFamily` em `Theme.kt`.

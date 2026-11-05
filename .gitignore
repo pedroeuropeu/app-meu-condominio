@@ -6,9 +6,25 @@
 .vscode/
 *.iml
 
-# Dependências / build (quando virar app nativo)
-node_modules/
-build/
+# Gradle / Android
 .gradle/
+.kotlin/
+build/
+/app/build/
 local.properties
+captures/
+.externalNativeBuild/
+.cxx/
 *.log
+
+# Assinatura (nunca versionar)
+keystore.properties
+keystore/
+*.jks
+*.keystore
+
+# APKs gerados para instalar no celular
+dist/
+
+# Ferramentas locais
+.claude/settings.local.json

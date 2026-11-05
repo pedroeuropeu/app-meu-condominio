@@ -1,4 +1,4 @@
-/* Meu Condomínio · Android — protótipo navegável (sem dependências).
+/* Condovitta · Android — protótipo navegável (sem dependências).
    Dois modos: Portaria (rápido) e App completo (morador). Pilha de telas com animações do Material 3,
    folhas inferiores, diálogos e snackbars, tudo dentro do aparelho. */
 'use strict';
@@ -71,9 +71,7 @@
     S['splash'] = {
         bare: true,
         body: () => `<div class="splash">
-            <span class="logo">${markSvg(58)}</span>
-            <h1>Meu<i> Condomínio</i></h1>
-            <p>Gestão inteligente. Condomínio ainda melhor.</p>
+            <img class="splash-logo" src="logo-condovitta-escuro.png" alt="Condovitta — Tecnologia para viver melhor em condomínio">
             <span class="spin"></span>
         </div>`,
         after: () => setTimeout(() => { if (cur().id === 'splash') navTo('login'); }, 1400),
@@ -84,7 +82,7 @@
     S['login'] = {
         bare: true,
         body: () => `<div class="auth">
-            <span class="logo">${markSvg(40)}</span>
+            <span class="brandlogo" role="img" aria-label="Condovitta"><img class="lt" src="logo-condovitta-compacta.png" alt=""><img class="dk" src="logo-condovitta-compacta-escuro.png" alt=""></span>
             <h1>Bem-vindo de volta</h1>
             <p class="lead">Entre com seu e-mail ou CPF e a senha para acessar o ${esc(D.condo.nome)}.</p>
             <div class="field"><span class="lab">E-mail ou CPF</span><input class="inp" value="ana.souza@email.com"></div>
@@ -609,11 +607,11 @@
         };
     }
 
-    /* marca (emblema Meu Condomínio) */
+    /* marca (emblema Condovitta: prédios + casa + arco azul→verde) */
     function markSvg(size) {
-        return `<svg viewBox="0 0 32 32" width="${size}" height="${size}" aria-hidden="true"><defs><linearGradient id="mk${size}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a97ff"/><stop offset="1" stop-color="#1b3a86"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#mk${size})"/><g fill="#fff"><path d="M6.2 23V16.2q0-1 1-1h3.1V23Z"/><path d="M11.6 23V13l7.2-5v15Z"/><path d="M18.8 23V12h6.1q1 0 1 1v10Z"/></g><g fill="#cfe0ff"><rect x="20.3" y="14" width="1.5" height="1.5" rx=".3"/><rect x="22.9" y="14" width="1.5" height="1.5" rx=".3"/><rect x="20.3" y="16.8" width="1.5" height="1.5" rx=".3"/><rect x="22.9" y="16.8" width="1.5" height="1.5" rx=".3"/><rect x="20.3" y="19.6" width="1.5" height="1.5" rx=".3"/><rect x="22.9" y="19.6" width="1.5" height="1.5" rx=".3"/></g><path d="M5 23.6Q16 29.4 27 20.9" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/></svg>`;
+        return `<svg viewBox="0 0 410 380" width="${size}" height="${size}" aria-hidden="true"><defs><linearGradient id="gl${size}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0866B5"/><stop offset="1" stop-color="#0A2C55"/></linearGradient><linearGradient id="gm${size}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A62B8"/><stop offset="1" stop-color="#0A2C55"/></linearGradient><linearGradient id="gt${size}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05C9AE"/><stop offset="1" stop-color="#0A6D8C"/></linearGradient><linearGradient id="gr${size}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14C2C0"/><stop offset="1" stop-color="#0A5FA6"/></linearGradient><linearGradient id="gs${size}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1062C4"/><stop offset=".55" stop-color="#05A8AA"/><stop offset="1" stop-color="#1BE79A"/></linearGradient></defs><path d="M33 160 Q33 154 38 151 L96 116 Q103 112 103 120 V318 H40 Q33 318 33 311 Z" fill="url(#gl${size})"/><path d="M120 76 L218 12 Q225 8 225 16 V230 H120 Z" fill="url(#gm${size})"/><path d="M225 12 L260 32 Q266 36 266 42 V230 H225 Z" fill="url(#gt${size})"/><path d="M281 70 Q281 62 288 66 L334 92 Q341 96 341 104 V208 L281 240 Z" fill="url(#gr${size})"/><path d="M104 222 L196 152 Q201 148 206 152 L306 228 V320 H104 Z" fill="#fff"/><g fill="#0A2C55"><rect x="168" y="216" width="25" height="25" rx="3"/><rect x="204" y="216" width="25" height="25" rx="3"/><rect x="168" y="251" width="25" height="25" rx="3"/><rect x="204" y="251" width="25" height="25" rx="3"/></g><path d="M24 280 C4 330 40 372 120 368 C240 362 372 292 392 196 C396 172 388 152 372 146 C380 160 378 180 368 198 C330 262 230 306 140 318 C80 326 40 316 32 296 C29 289 27 284 24 280 Z" fill="url(#gs${size})"/></svg>`;
     }
-    const WM = `<svg class="wmk" viewBox="0 0 32 32" aria-hidden="true"><g fill="#fff"><path d="M6.2 23V16.2q0-1 1-1h3.1V23Z"/><path d="M11.6 23V13l7.2-5v15Z"/><path d="M18.8 23V12h6.1q1 0 1 1v10Z"/></g><path d="M5 23.6Q16 29.4 27 20.9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+    const WM = `<svg class="wmk" viewBox="0 0 410 380" aria-hidden="true"><defs><mask id="wmm"><rect width="410" height="380" fill="#fff"/><path d="M90 226 L196 140 Q201 136 206 140 L320 230 V334 H90 Z" fill="#000"/></mask><mask id="wmh"><rect width="410" height="380" fill="#fff"/><g fill="#000"><rect x="168" y="216" width="25" height="25" rx="3"/><rect x="204" y="216" width="25" height="25" rx="3"/><rect x="168" y="251" width="25" height="25" rx="3"/><rect x="204" y="251" width="25" height="25" rx="3"/></g></mask></defs><g fill="#fff"><g mask="url(#wmm)"><path d="M33 160 Q33 154 38 151 L96 116 Q103 112 103 120 V318 H40 Q33 318 33 311 Z"/><path d="M120 76 L218 12 Q225 8 225 16 V230 H120 Z"/><path d="M228 14 L260 32 Q266 36 266 42 V230 H228 Z"/><path d="M281 70 Q281 62 288 66 L334 92 Q341 96 341 104 V208 L281 240 Z"/></g><path mask="url(#wmh)" d="M104 222 L196 152 Q201 148 206 152 L306 228 V312 H104 Z"/><path d="M24 280 C4 330 40 372 120 368 C240 362 372 292 392 196 C396 172 388 152 372 146 C380 160 378 180 368 198 C330 262 230 306 140 318 C80 326 40 316 32 296 C29 289 27 284 24 280 Z"/></g></svg>`;
 
     /* ============================== MOTOR ============================== */
     const views = $('#views'), appEl = $('#app'), ovl = $('#ovl'), snackEl = $('#snack');

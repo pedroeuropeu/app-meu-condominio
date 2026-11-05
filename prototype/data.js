@@ -1,4 +1,4 @@
-/* Meu Condomínio · dados de exemplo do protótipo (fictícios).
+/* Condovitta · dados de exemplo do protótipo (fictícios).
    Residencial Vila do Sol 2 — Goiânia/GO. O "você" do app completo é a Ana Souza (B-204);
    a portaria é operada pelo Carlos Mendes (turno 06h–14h). Datas âncora em novembro/2026. */
 'use strict';

@@ -1,8 +1,23 @@
-# Meu Condomínio · Android
+# Condovitta · Android
 
-App Android do **Meu Condomínio** — o mesmo produto da plataforma web de gestão de condomínios
-([`../gestao-condominio`](../gestao-condominio)). Marca "Meu Condomínio" (azul `#1D4E89 → #3366FF`, emblema de
-prédios), no mesmo modelo do app Android do e-Finances ([`../e-finances-app-android`](../e-finances-app-android)).
+App Android do **Condovitta** — *Tecnologia para viver melhor em condomínio* — o mesmo produto da plataforma web de
+gestão de condomínios ([`../gestao-condominio`](../gestao-condominio)), no mesmo modelo do app Android do e-Finances
+([`../e-finances-app-android`](../e-finances-app-android)). Pacote: `br.com.condovitta.app`.
+
+> O repositório continua `app-meu-condominio`; só o nome do produto mudou para **Condovitta**.
+
+## Identidade visual
+| Uso | Cor |
+|---|---|
+| Azul-marinho (texto "Condo", tinta, topo) | `#0A2C55` |
+| Azul da marca (ação principal) | `#0A62B8` |
+| Verde-água ("vitta", destaque) | `#01B6A3` |
+| Arco do emblema (degradê) | `#1062C4 → #05A8AA → #1BE79A` |
+| Portaria (acento de função, não é marca) | âmbar `#E59008` |
+
+Títulos em **Lexend**, texto em Inter. Arquivos em `prototype/`: `logo-condovitta.png` (com slogan),
+`logo-condovitta-compacta.png` (sem slogan), as versões `-escuro` (texto branco, para fundo escuro) e o emblema
+em vetor no `favicon.svg` e no `markSvg()` do `app.js` (base para o ícone adaptativo do Android).
 
 O protótipo aprovado fica em [`prototype/`](prototype/) (HTML navegável, sem dependências). Abra
 `prototype/index.html` ou rode o preview `prototipo` do [`.claude/launch.json`](.claude/launch.json)
@@ -28,7 +43,7 @@ Pensado para o porteiro ganhar **agilidade** no balcão. Tudo em acento âmbar p
 | **Mais** | Livro da portaria, leitura de gás, veículos e placas, trocar de perfil |
 
 ### 🏢 App do morador (completo)
-A visão do morador, no azul da marca.
+A visão do morador, nas cores da marca (azul-marinho, azul e verde-água).
 
 | Tela | O que faz |
 |---|---|
@@ -54,7 +69,7 @@ As telas ainda não detalhadas aparecem com um estado **"Em construção"** hone
 ```
 prototype/
 ├── index.html   # palco: índice de telas, aparelho ao centro, notas da tela
-├── styles.css   # marca Meu Condomínio, moldura do aparelho, componentes Material 3, claro/escuro
+├── styles.css   # marca Condovitta, moldura do aparelho, componentes Material 3, claro/escuro
 ├── data.js      # dados de exemplo do condomínio
 └── app.js       # motor de navegação + todas as telas
 ```
@@ -67,5 +82,5 @@ prototype/
 
 ## Próximos passos (sugestão)
 Transformar o protótipo em app Android nativo (Kotlin + Jetpack Compose + Material 3), como no e-Finances, ligando
-nas APIs do backend `gestao-condominio`. Seguir fechando módulos: assinatura de documentos, assembleias/plenário,
+nas APIs do backend `gestao-condominio`. Plano detalhado em [`docs/PLANO-ANDROID.md`](docs/PLANO-ANDROID.md). Seguir fechando módulos: assinatura de documentos, assembleias/plenário,
 chamados, gás e prestação de contas.

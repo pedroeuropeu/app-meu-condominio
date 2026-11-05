@@ -1,23 +1,24 @@
-/* Meu Condomínio · Android — protótipo navegável
+/* Condovitta · Android — protótipo navegável
    Palco: índice de telas à esquerda, aparelho Android ao centro, notas da tela à direita. No celular o app ocupa a tela toda.
-   Marca: azul Meu Condomínio (#1D4E89 → #3366FF). Modo Portaria ganha um acento âmbar; o app do morador fica no azul.
-   Títulos em Plus Jakarta Sans, texto em Inter, ícones Material Symbols (os mesmos do app em Compose). */
+   Marca Condovitta: azul-marinho #0A2C55, azul #0A62B8, verde-água #01B6A3 e o arco azul→verde (#1062C4 → #05A8AA → #1BE79A).
+   Modo Portaria ganha um acento âmbar; o app do morador fica nas cores da marca.
+   Títulos em Lexend, texto em Inter, ícones Material Symbols (os mesmos do app em Compose). */
 
 :root {
-    --pg-bg: #E8EDF5;
+    --pg-bg: #E6EEF2;
     --pg-card: #FFFFFF;
-    --pg-fg: #0C1A33;
+    --pg-fg: #0A2C4E;
     --pg-text: #334155;
     --pg-muted: #5B6B82;
-    --pg-line: #D5DEEA;
-    --pg-hover: #EEF2F9;
-    --pg-sel-bg: #1D3E7A;
+    --pg-line: #D3DFE6;
+    --pg-hover: #ECF3F6;
+    --pg-sel-bg: #0A2C55;
     --pg-sel-fg: #FFFFFF;
-    --pg-accent: #1F4FE0;
-    --pg-glow-a: rgba(51, 102, 255, .18);
-    --pg-glow-b: rgba(29, 78, 137, .14);
+    --pg-accent: #0A9C8C;
+    --pg-glow-a: rgba(10, 98, 184, .16);
+    --pg-glow-b: rgba(1, 182, 163, .16);
     --pg-bezel: #04070C;
-    --f-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --f-display: 'Lexend', system-ui, sans-serif;
     --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -70,7 +71,7 @@ button { cursor: pointer; }
 .pgroup > span { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--pg-muted); padding: 0 10px 4px; display: flex; align-items: center; gap: 7px; }
 .pgroup > span::before { content: ''; width: 7px; height: 7px; border-radius: 3px; background: var(--g-color, var(--pg-accent)); flex: none; }
 .pgroup.port { --g-color: #E59008; }
-.pgroup.app { --g-color: #2F62D8; }
+.pgroup.app { --g-color: #0A62B8; }
 .pindex button { display: flex; align-items: center; gap: 10px; border: 0; background: none; text-align: left; border-radius: 10px; padding: 7px 10px; font-size: 13.5px; color: var(--pg-text); }
 .pindex button .ms { font-size: 18px; color: var(--pg-muted); }
 .pindex button:hover { background: var(--pg-hover); }
@@ -124,21 +125,21 @@ button { cursor: pointer; }
     .stage.menu::after { content: ''; position: fixed; inset: 0; z-index: 25; background: rgba(4, 10, 20, .4); }
     .pside .pnote-mini { display: flex; }
     .pfab { display: flex; position: fixed; z-index: 20; right: 0; top: 46%; writing-mode: vertical-rl; border: 0; border-radius: 10px 0 0 10px;
-        background: #1D3E7A; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 12px 5px; opacity: .9; }
+        background: #0A2C55; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 12px 5px; opacity: .9; }
     .pclose { display: inline-flex; align-self: flex-end; border: 0; background: var(--pg-hover); border-radius: 999px; width: 36px; height: 36px; align-items: center; justify-content: center; }
 }
 
 /* ============================== app (tokens) ============================== */
 .app {
-    --bg: #F3F6FB; --surface: #FFFFFF; --surface-2: #EEF2F9; --surface-3: #E2E9F3; --line: #E4EAF3; --line-2: #D0DAE8;
-    --ink: #0C1A33; --text: #334155; --muted: #5B6B82; --faint: #93A1B6;
-    --primary: #1F4FE0; --on-primary: #FFFFFF; --primary-soft: #E5ECFC; --on-primary-soft: #16367F; --state: rgba(31, 79, 224, .07);
-    --accent: #06B6D4; --accent-ink: #0E7490; --accent-soft: #CFF6FD;
+    --bg: #F2F6F8; --surface: #FFFFFF; --surface-2: #EBF2F5; --surface-3: #DFE9EE; --line: #E2EAEF; --line-2: #CEDBE3;
+    --ink: #0A2C4E; --text: #334155; --muted: #5B6B82; --faint: #93A1B6;
+    --primary: #0A62B8; --on-primary: #FFFFFF; --primary-soft: #E0EDF8; --on-primary-soft: #0A2C55; --state: rgba(10, 98, 184, .07);
+    --accent: #01B6A3; --accent-ink: #0B7C70; --accent-soft: #D3F5F0;
     --gold: #E59008; --gold-ink: #B2730A; --gold-soft: #FDF0D6;
     --income: #15803D; --income-soft: #DCFCE7; --expense: #DC2626; --expense-soft: #FEE2E2; --warn: #B45309; --warn-soft: #FEF3C7; --info: #1D4ED8; --info-soft: #DBEAFE;
     --violet: #7C3AED; --violet-soft: #EDE4FE;
-    --hero-a: #1D4E89; --hero-b: #3366FF; --hero-fg: #FFFFFF; --hero-muted: rgba(255, 255, 255, .72);
-    --nav-bg: #FFFFFF; --nav-ind: #DDE8FB; --scrim: rgba(8, 18, 34, .45); --inverse: #13233A; --on-inverse: #EEF3F9;
+    --hero-a: #0A2C55; --hero-b: #0A7FA0; --hero-fg: #FFFFFF; --hero-muted: rgba(255, 255, 255, .72);
+    --nav-bg: #FFFFFF; --nav-ind: #D6EDF0; --scrim: rgba(8, 18, 34, .45); --inverse: #0E2440; --on-inverse: #EEF3F9;
     --shadow: 0 1px 2px rgba(12, 26, 51, .05), 0 6px 20px -10px rgba(12, 26, 51, .16);
     --shadow-pop: 0 14px 36px -10px rgba(12, 26, 51, .28), 0 4px 12px -6px rgba(12, 26, 51, .12);
     --sb: 30px; --gb: 18px;
@@ -146,15 +147,15 @@ button { cursor: pointer; }
     font-family: var(--f-body); font-size: 14px; line-height: 1.45; isolation: isolate; -webkit-tap-highlight-color: transparent;
 }
 .app.dark {
-    --bg: #0A121F; --surface: #111E31; --surface-2: #16263C; --surface-3: #1F3150; --line: #1F2E45; --line-2: #2B3D58;
+    --bg: #07141F; --surface: #0E1F2E; --surface-2: #13283A; --surface-3: #1B3449; --line: #1B3043; --line-2: #284259;
     --ink: #EEF3F9; --text: #CAD5E3; --muted: #90A1B9; --faint: #607089;
-    --primary: #6AA0FF; --on-primary: #06152E; --primary-soft: #1A2E52; --on-primary-soft: #CFE0FB; --state: rgba(106, 160, 255, .09);
-    --accent: #22D3EE; --accent-ink: #67E8F9; --accent-soft: rgba(34, 211, 238, .14);
+    --primary: #5BB4EE; --on-primary: #04192C; --primary-soft: #133552; --on-primary-soft: #CDE7F8; --state: rgba(91, 180, 238, .09);
+    --accent: #2DD4BF; --accent-ink: #5EEAD4; --accent-soft: rgba(45, 212, 191, .14);
     --gold: #FBBF24; --gold-ink: #FBBF24; --gold-soft: rgba(251, 191, 36, .14);
     --income: #4ADE80; --income-soft: rgba(74, 222, 128, .13); --expense: #F87171; --expense-soft: rgba(248, 113, 113, .13); --warn: #FBBF24; --warn-soft: rgba(251, 191, 36, .13); --info: #93B4FF; --info-soft: rgba(96, 150, 255, .14);
     --violet: #C4B5FD; --violet-soft: rgba(139, 92, 246, .18);
-    --hero-a: #15305A; --hero-b: #1E4299; --hero-fg: #FFFFFF; --hero-muted: rgba(255, 255, 255, .72);
-    --nav-bg: #0E1A2B; --nav-ind: #1C305A; --scrim: rgba(3, 8, 16, .6); --inverse: #E7EEF8; --on-inverse: #0C1A33;
+    --hero-a: #0A2440; --hero-b: #0A5E80; --hero-fg: #FFFFFF; --hero-muted: rgba(255, 255, 255, .72);
+    --nav-bg: #0B1A27; --nav-ind: #143A4A; --scrim: rgba(3, 8, 16, .6); --inverse: #E7EEF8; --on-inverse: #0C1A33;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .5);
     --shadow-pop: 0 18px 44px -12px rgba(0, 0, 0, .66), 0 4px 12px -6px rgba(0, 0, 0, .4);
     color-scheme: dark;
@@ -461,7 +462,7 @@ textarea.inp { height: auto; min-height: 84px; padding: 12px 14px; resize: none;
 .tline .ti .ts { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
 /* login / splash */
-.splash { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 30px; color: #fff; background: radial-gradient(130% 90% at 50% 0%, #2E59C9, #14305F 62%, #0B1F3F 100%); text-align: center; }
+.splash { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 30px; color: #fff; background: radial-gradient(120% 80% at 50% 0%, #0D4F86, #0A2C55 58%, #061A33 100%); text-align: center; }
 .splash .logo { width: 92px; height: 92px; border-radius: 28px; background: rgba(255,255,255,.12); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 20px 50px -12px rgba(0,0,0,.5); animation: fadeUp .5s both; }
 .splash .logo svg { width: 58px; height: 58px; }
 .splash h1 { font-family: var(--f-display); font-size: 27px; font-weight: 800; letter-spacing: -.02em; margin: 0; animation: fadeUp .5s .06s both; }
@@ -472,10 +473,16 @@ textarea.inp { height: auto; min-height: 84px; padding: 12px 14px; resize: none;
 
 .auth { flex: 1; display: flex; flex-direction: column; padding: calc(var(--sb) + 20px) 24px calc(24px + var(--gb)); background: var(--bg); overflow-y: auto; scrollbar-width: none; }
 .auth::-webkit-scrollbar { display: none; }
-.auth .logo { width: 66px; height: 66px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #1D4E89, #3366FF); box-shadow: var(--shadow-pop); }
-.auth .logo svg { width: 40px; height: 40px; }
+.auth .logo { width: 66px; height: 66px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-pop); }
+.auth .logo svg { width: 46px; height: 46px; }
 .auth h1 { font-family: var(--f-display); font-size: 24px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); margin: 20px 0 6px; }
 .auth .lead { font-size: 14px; color: var(--muted); margin: 0 0 8px; line-height: 1.5; }
+
+.splash-logo { width: 250px; max-width: 80%; height: auto; animation: fadeUp .5s both; }
+.auth .brandlogo { display: block; height: 44px; }
+.auth .brandlogo img { height: 44px; width: auto; }
+.auth .brandlogo .dk, .app.dark .auth .brandlogo .lt { display: none; }
+.app.dark .auth .brandlogo .dk { display: block; }
 
 /* seletor de perfil (entrada) */
 .pick { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
@@ -487,7 +494,7 @@ textarea.inp { height: auto; min-height: 84px; padding: 12px 14px; resize: none;
 .pick button .d { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 .pick button .chev { color: var(--faint); font-size: 22px; }
 .pick button.pk-port .ic { background: linear-gradient(140deg, #B2730A, #F6A821); color: #fff; }
-.pick button.pk-app .ic { background: linear-gradient(140deg, #1D4E89, #3366FF); color: #fff; }
+.pick button.pk-app .ic { background: linear-gradient(140deg, #0A2C55, #0A7FA0); color: #fff; }
 
 /* grade "mais" */
 .mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 6px; }

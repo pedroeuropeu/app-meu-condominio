@@ -28,8 +28,9 @@ object Brand {
     val ArcMid = Color(0xFF05A8AA)
     val ArcEnd = Color(0xFF1BE79A)
 
-    /** Acento de função da Portaria (não é cor da marca). */
-    val Amber = Color(0xFFE59008)
+    /** Portaria: cabeçalho escuro e um azul só nos ícones e botões (mais limpo, separado do morador). */
+    val PortariaInk = Color(0xFF111827)
+    val PortariaBlue = Color(0xFF2563EB)
 }
 
 /** Cores que o Material 3 não tem: estados, acento, topo em degradê e as cores de apoio do protótipo. */
@@ -61,11 +62,11 @@ private fun lightExtended(portaria: Boolean) = ExtendedColors(
     warn = Color(0xFFB45309), warnContainer = Color(0xFFFEF3C7),
     info = Color(0xFF1D4ED8), infoContainer = Color(0xFFDBEAFE),
     accent = Brand.Teal, accentContainer = Color(0xFFD3F5F0),
-    heroStart = if (portaria) Color(0xFF7A4E06) else Brand.Navy,
-    heroEnd = if (portaria) Brand.Amber else Color(0xFF0A7FA0),
+    heroStart = if (portaria) Brand.PortariaInk else Brand.Navy,
+    heroEnd = if (portaria) Brand.PortariaInk else Color(0xFF0A7FA0),
     card = Color.White, cardBorder = Color(0xFFE2EAEF),
     ink = Color(0xFF0A2C4E), muted = Color(0xFF5B6B82), faint = Color(0xFF93A1B6),
-    navIndicator = if (portaria) Color(0xFFFDF0D6) else Color(0xFFD6EDF0)
+    navIndicator = if (portaria) Color(0xFFEEF4FF) else Color(0xFFD6EDF0)
 )
 
 private fun darkExtended(portaria: Boolean) = ExtendedColors(
@@ -74,18 +75,18 @@ private fun darkExtended(portaria: Boolean) = ExtendedColors(
     warn = Color(0xFFFBBF24), warnContainer = Color(0x21FBBF24),
     info = Color(0xFF93B4FF), infoContainer = Color(0x246096FF),
     accent = Color(0xFF2DD4BF), accentContainer = Color(0x242DD4BF),
-    heroStart = if (portaria) Color(0xFF4A2F05) else Color(0xFF0A2440),
-    heroEnd = if (portaria) Color(0xFFB2730A) else Color(0xFF0A5E80),
+    heroStart = if (portaria) Color(0xFF0B1220) else Color(0xFF0A2440),
+    heroEnd = if (portaria) Color(0xFF0B1220) else Color(0xFF0A5E80),
     card = Color(0xFF0E1F2E), cardBorder = Color(0xFF1B3043),
     ink = Color(0xFFEEF3F9), muted = Color(0xFF90A1B9), faint = Color(0xFF607089),
-    navIndicator = if (portaria) Color(0x24FBBF24) else Color(0xFF143A4A)
+    navIndicator = if (portaria) Color(0x2460A5FA) else Color(0xFF143A4A)
 )
 
 private fun lightScheme(portaria: Boolean): ColorScheme = lightColorScheme(
-    primary = if (portaria) Brand.Amber else Brand.Blue,
-    onPrimary = if (portaria) Color(0xFF3A2606) else Color.White,
-    primaryContainer = if (portaria) Color(0xFFFDF0D6) else Color(0xFFE0EDF8),
-    onPrimaryContainer = if (portaria) Color(0xFFB2730A) else Brand.Navy,
+    primary = if (portaria) Brand.PortariaBlue else Brand.Blue,
+    onPrimary = Color.White,
+    primaryContainer = if (portaria) Color(0xFFEEF4FF) else Color(0xFFE0EDF8),
+    onPrimaryContainer = if (portaria) Brand.PortariaBlue else Brand.Navy,
     secondary = Color(0xFF0B7C70), onSecondary = Color.White,
     secondaryContainer = Color(0xFFD3F5F0), onSecondaryContainer = Color(0xFF064E46),
     tertiary = Brand.Navy, onTertiary = Color.White,
@@ -100,10 +101,10 @@ private fun lightScheme(portaria: Boolean): ColorScheme = lightColorScheme(
 )
 
 private fun darkScheme(portaria: Boolean): ColorScheme = darkColorScheme(
-    primary = if (portaria) Color(0xFFFBBF24) else Color(0xFF5BB4EE),
-    onPrimary = if (portaria) Color(0xFF2A1A03) else Color(0xFF04192C),
-    primaryContainer = if (portaria) Color(0x24FBBF24) else Color(0xFF133552),
-    onPrimaryContainer = if (portaria) Color(0xFFFBBF24) else Color(0xFFCDE7F8),
+    primary = if (portaria) Color(0xFF60A5FA) else Color(0xFF5BB4EE),
+    onPrimary = if (portaria) Color(0xFF0B1220) else Color(0xFF04192C),
+    primaryContainer = if (portaria) Color(0x2460A5FA) else Color(0xFF133552),
+    onPrimaryContainer = if (portaria) Color(0xFF93C5FD) else Color(0xFFCDE7F8),
     secondary = Color(0xFF5EEAD4), onSecondary = Color(0xFF032622),
     secondaryContainer = Color(0x242DD4BF), onSecondaryContainer = Color(0xFF99F6E4),
     tertiary = Color(0xFFCDE7F8), onTertiary = Brand.Navy,

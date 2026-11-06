@@ -82,10 +82,50 @@ class PainelViewModel @Inject constructor(private val repo: PortariaRepository) 
 enum class FiltroVisitas { ESPERADOS, DENTRO, HISTORICO }
 
 @HiltViewModel
-class VisitantesViewModel @Inject constructor(private val repo: PortariaRepository) : ViewModel() {
+class VisitantesViewModel @Inject constructor(
+    private val repo: PortariaRepository,
+    private val messenger: Messenger,
+    saved: SavedStateHandle
+) : ViewModel() {
     private val _state = MutableStateFlow(Loadable<AcessoListas>())
     val state: StateFlow<Loadable<AcessoListas>> = _state.asStateFlow()
-    val filtro = MutableStateFlow(FiltroVisitas.ESPERADOS)
+    /** o botão "No condomínio" do Início abre já nesse filtro (argumento da rota PortVisitantes) */
+    val filtro = MutableStateFlow(if (saved.get<Boolean>("dentro") == true) FiltroVisitas.DENTRO else FiltroVisitas.ESPERADOS)
+    /** visitante com ação em andamento (o botão da linha mostra que está trabalhando) */
+    val ocupado = MutableStateFlow<Long?>(null)
+
+    /** "Liberar" da lista: entrada (com a foto, se tirou) e o aviso com Desfazer. */
+    fun liberar(v: Visita, foto: ByteArray?) {
+        if (ocupado.value != null) return
+        ocupado.value = v.visitanteId
+        viewModelScope.launch {
+            val (r, fotoFalhou) = repo.entrarComFoto(v.visitanteId, null, foto)
+            when (r) {
+                is Outcome.Ok -> {
+                    val acesso = r.value.acessoId
+                    val texto = "Entrada liberada · ${v.nome}" + if (fotoFalhou) " (a foto não foi enviada)" else ""
+                    if (acesso != null) messenger.undoable(texto, restore = { repo.desfazer(acesso) }, onRestored = ::refresh) else messenger.show(texto)
+                    refresh()
+                }
+                is Outcome.Err -> messenger.show(r.error.message)
+            }
+            ocupado.value = null
+        }
+    }
+
+    /** "Saída" da lista de quem está no condomínio. */
+    fun saida(v: Visita) {
+        val acesso = v.acessoId ?: return
+        if (ocupado.value != null) return
+        ocupado.value = v.visitanteId
+        viewModelScope.launch {
+            when (val r = repo.saida(acesso)) {
+                is Outcome.Ok -> { messenger.undoable("Saída registrada · ${v.nome}", restore = { repo.desfazer(acesso) }, onRestored = ::refresh); refresh() }
+                is Outcome.Err -> messenger.show(r.error.message)
+            }
+            ocupado.value = null
+        }
+    }
 
     fun refresh() {
         viewModelScope.launch {
@@ -121,13 +161,28 @@ class VisitanteViewModel @Inject constructor(
             _state.update { it.copy(loading = true, error = null) }
             _state.value = when (val r = repo.acesso()) {
                 is Outcome.Ok -> r.value.todas().firstOrNull { it.visitanteId == visitanteId }
+                    ?.also { v -> carregarFoto(v) }
                     ?.let { Loadable(it, loading = false) } ?: Loadable(null, false, "Este visitante não está mais na lista de hoje.")
                 is Outcome.Err -> Loadable(_state.value.data, false, r.error.message)
             }
         }
     }
 
-    fun liberar(via: ViaLiberacao? = null) = acao("Entrada liberada") { repo.entrada(visitanteId, via) }
+    /** foto de quem entrou (quando a portaria tirou) */
+    val foto = MutableStateFlow<ByteArray?>(null)
+
+    fun liberar(via: ViaLiberacao? = null, foto: ByteArray? = null) = acao("Entrada liberada") {
+        val (r, fotoFalhou) = repo.entrarComFoto(visitanteId, via, foto)
+        if (fotoFalhou) messenger.show("A foto não foi enviada; a entrada foi liberada.")
+        if (r is Outcome.Ok && foto != null && !fotoFalhou) this.foto.value = foto
+        r
+    }
+    private fun carregarFoto(v: Visita) {
+        val acesso = v.acessoId ?: return
+        if (!v.temFoto || foto.value != null) return
+        viewModelScope.launch { (repo.verFotoAcesso(acesso) as? Outcome.Ok)?.value?.let { foto.value = it } }
+    }
+
     fun consultar() = acao("Pedido enviado ao morador", undo = false) { repo.consultar(visitanteId) }
     fun recusar() = _state.value.data?.acessoId?.let { id -> acao("Entrada recusada") { repo.recusar(id) } }
     fun saida() = _state.value.data?.acessoId?.let { id -> acao("Saída registrada") { repo.saida(id) } }

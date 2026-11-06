@@ -1,20 +1,12 @@
 package br.com.condovitta.app.feature.portaria
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material.icons.rounded.Inventory2
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
 import br.com.condovitta.app.domain.Me
 import br.com.condovitta.app.domain.Perfil
 import br.com.condovitta.app.feature.mais.MaisActions
-import br.com.condovitta.app.feature.mais.MaisScreen
 import br.com.condovitta.app.ui.ModeShell
 import br.com.condovitta.app.ui.Tab
 import br.com.condovitta.app.ui.navigation.BloqueadosRoute
@@ -30,7 +22,10 @@ import br.com.condovitta.app.ui.navigation.PortVisitantes
 import br.com.condovitta.app.ui.navigation.VisitanteDetalhe
 import br.com.condovitta.app.ui.soon
 
-/** Modo Portaria (rápido): Painel, Visitantes, Encomendas e Mais, no acento âmbar. */
+/**
+ * Modo Portaria: simples e de toque fácil. Sem barra inferior — o Início (busca e 6 botões grandes) é o ponto de partida
+ * e o menu do cabeçalho guarda o resto da rotina. Cabeçalho escuro e ícones azuis, separado do app do morador.
+ */
 @Composable
 fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: br.com.condovitta.app.ui.Messenger, extras: br.com.condovitta.app.ui.ModoExtras = br.com.condovitta.app.ui.ModoExtras()) {
     ModeShell(
@@ -42,26 +37,16 @@ fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: br.com.con
                 abrirPortaria(d, null, nav)
             }
         },
-        tabs = listOf(
-            Tab(PortPainel, "Painel", Icons.Outlined.GridView, Icons.Rounded.GridView),
-            Tab(PortVisitantes, "Visitantes", Icons.Outlined.Badge, Icons.Rounded.Badge),
-            Tab(PortEncomendas, "Encomendas", Icons.Outlined.Inventory2, Icons.Rounded.Inventory2),
-            Tab(PortMais, "Mais", Icons.Rounded.Menu)
-        )
+        tabs = listOf(Tab(PortPainel, "Início", Icons.Rounded.GridView))
     ) { nav, padding ->
-        fun tab(route: Any) = nav.navigate(route) {
-            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
         val pnav = PortariaNav(
             visitante = { nav.navigate(VisitanteDetalhe(it)) },
             novaVisita = { nav.navigate(NovaVisitaRoute) },
             bloqueados = { nav.navigate(BloqueadosRoute) },
             encomenda = { nav.navigate(EncomendaDetalhe(it)) },
             novaEncomenda = { nav.navigate(NovaEncomendaRoute) },
-            abaVisitantes = { tab(PortVisitantes) },
-            abaEncomendas = { tab(PortEncomendas) },
+            abaVisitantes = { nav.navigate(PortVisitantes()) { launchSingleTop = true } },
+            abaEncomendas = { nav.navigate(PortEncomendas) { launchSingleTop = true } },
             soon = { key ->
                 when (key) {
                     "port/bloqueados" -> nav.navigate(BloqueadosRoute)
@@ -74,12 +59,14 @@ fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: br.com.con
                 }
             },
             back = { nav.popBackStack() },
-            notificacoes = { nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute) }
+            notificacoes = { nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute) },
+            dentro = { nav.navigate(PortVisitantes(dentro = true)) { launchSingleTop = true } },
+            menu = { nav.navigate(PortMais) { launchSingleTop = true } }
         )
         composable<PortPainel> { PainelScreen(me, perfil, padding, pnav, messenger, extras.naoLidas) }
-        composable<PortVisitantes> { VisitantesScreen(padding, pnav) }
-        composable<PortEncomendas> { EncomendasScreen(padding, pnav) }
-        composable<PortMais> { MaisScreen(me, perfil, mais, padding, onSoon = pnav.soon) }
+        composable<PortVisitantes> { VisitantesScreen(pnav) }
+        composable<PortEncomendas> { EncomendasScreen(pnav) }
+        composable<PortMais> { PortariaMenuScreen(me, perfil, mais, pnav) }
         composable<VisitanteDetalhe> { VisitanteScreen(pnav) }
         composable<NovaVisitaRoute> { NovaVisitaScreen(pnav) }
         composable<BloqueadosRoute> { BloqueadosScreen(pnav) }
@@ -97,14 +84,9 @@ fun PortariaApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: br.com.con
 
 /** Tela da portaria para cada destino de notificação. */
 internal fun abrirPortaria(d: br.com.condovitta.app.domain.Destino, pnav: PortariaNav?, nav: androidx.navigation.NavHostController) {
-    fun tab(route: Any) = nav.navigate(route) {
-        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
     when (d) {
-        br.com.condovitta.app.domain.Destino.PORTARIA_ACESSO, br.com.condovitta.app.domain.Destino.VISITANTES -> tab(PortVisitantes)
-        br.com.condovitta.app.domain.Destino.PORTARIA_ENCOMENDAS, br.com.condovitta.app.domain.Destino.ENCOMENDAS -> tab(PortEncomendas)
+        br.com.condovitta.app.domain.Destino.PORTARIA_ACESSO, br.com.condovitta.app.domain.Destino.VISITANTES -> nav.navigate(PortVisitantes()) { launchSingleTop = true }
+        br.com.condovitta.app.domain.Destino.PORTARIA_ENCOMENDAS, br.com.condovitta.app.domain.Destino.ENCOMENDAS -> nav.navigate(PortEncomendas) { launchSingleTop = true }
         br.com.condovitta.app.domain.Destino.RESERVAS -> nav.navigate(PortReservasRoute)
         br.com.condovitta.app.domain.Destino.PORTARIA_GAS -> nav.navigate(br.com.condovitta.app.ui.navigation.GasRoute)
         else -> nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute)

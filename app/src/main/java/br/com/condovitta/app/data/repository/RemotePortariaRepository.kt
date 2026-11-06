@@ -108,6 +108,15 @@ class RemotePortariaRepository @Inject constructor(
         is Outcome.Err -> if (r.error == br.com.condovitta.app.domain.AppError.NotFound) Outcome.Ok(null) else r
     }
 
+    override suspend fun fotoAcesso(acessoId: Long, foto: ByteArray): Outcome<Visita> = apiCall {
+        api.fotoAcesso(acessoId, MultipartBody.Part.createFormData("foto", "visitante.jpg", foto.toRequestBody("image/jpeg".toMediaType()))).toDomain()
+    }
+
+    override suspend fun verFotoAcesso(acessoId: Long): Outcome<ByteArray?> = when (val r = apiCall { api.verFotoAcesso(acessoId).use { it.bytes() } }) {
+        is Outcome.Ok -> r
+        is Outcome.Err -> if (r.error == br.com.condovitta.app.domain.AppError.NotFound) Outcome.Ok(null) else r
+    }
+
     private companion object {
         val HORA: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         const val PNG_DATA_URL = "data:image/png;base64,"

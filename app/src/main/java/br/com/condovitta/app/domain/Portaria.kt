@@ -62,7 +62,9 @@ data class Visita(
     val respondidoEm: LocalDateTime?,
     val respondidoPor: String?,
     val recado: String?,
-    val autorizadoPor: String?
+    val autorizadoPor: String?,
+    /** a portaria tirou a foto de quem entrou */
+    val temFoto: Boolean = false
 ) {
     val veiculo: String? get() = listOfNotNull(veiculoModelo, veiculoCor).joinToString(" ").ifBlank { null }
     val janela: String? get() = if (inicio != null && fim != null) "$inicio – $fim" else null
@@ -185,4 +187,16 @@ object Portaria {
 
     /** encomenda parada: muitos avisos sem retirada */
     fun atrasada(e: Encomenda) = !e.retirada && e.avisos >= 3
+
+    /** número da unidade sem o bloco: "B-204" → "204", "Apto 12" → "12" */
+    fun numeroDa(u: UnidadeResumo): String = u.rotulo.substringAfterLast('-').filter { it.isLetterOrDigit() }.let { r ->
+        if (r.any { it.isDigit() } && r.any { it.isLetter() } && '-' !in u.rotulo) r.filter { it.isDigit() } else r
+    }
+
+    /** a unidade do teclado da portaria: bloco (se houver) + número digitado, ignorando zeros à esquerda */
+    fun acharUnidade(unidades: List<UnidadeResumo>, bloco: String?, numero: String): UnidadeResumo? {
+        val n = numero.trimStart('0').ifEmpty { if (numero.isEmpty()) return null else "0" }
+        return unidades.filter { bloco == null || it.bloco.isNullOrBlank() || it.bloco.equals(bloco, ignoreCase = true) }
+            .firstOrNull { numeroDa(it).trimStart('0').equals(n, ignoreCase = true) }
+    }
 }

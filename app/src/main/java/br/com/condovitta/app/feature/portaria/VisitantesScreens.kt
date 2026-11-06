@@ -1,5 +1,18 @@
 package br.com.condovitta.app.feature.portaria
 
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.FilledTonalButton
+import br.com.condovitta.app.core.common.Photos
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -90,46 +103,57 @@ import br.com.condovitta.app.domain.Visita
 /* ------------------------------------------------------------------ Visitantes e acesso (aba) */
 
 @Composable
-fun VisitantesScreen(padding: PaddingValues, nav: PortariaNav, vm: VisitantesViewModel = hiltViewModel()) {
+fun VisitantesScreen(nav: PortariaNav, vm: VisitantesViewModel = hiltViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val filtro by vm.filtro.collectAsStateWithLifecycle()
+    val ocupado by vm.ocupado.collectAsStateWithLifecycle()
+    var liberando by remember { mutableStateOf<Visita?>(null) }
     LifecycleResumeEffect(Unit) {
         vm.refresh()
         onPauseOrDispose { }
     }
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Visitantes e acesso", style = MaterialTheme.typography.titleLarge) },
-                actions = {
-                    IconButton(onClick = nav.bloqueados) { Icon(Icons.Rounded.Shield, contentDescription = "Bloqueados") }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-            )
+            BackTopBar("Visitantes", onBack = nav.back) {
+                IconButton(onClick = nav.bloqueados) { Icon(Icons.Rounded.Shield, contentDescription = "Bloqueados") }
+            }
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = nav.novaVisita, icon = { Icon(Icons.Rounded.PersonAdd, contentDescription = null) }, text = { Text("Nova visita") },
-                containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.testTag("fab_nova_visita")
-            )
+        bottomBar = {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                Button(
+                    onClick = nav.novaVisita,
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp).height(56.dp).testTag("fab_nova_visita")
+                ) {
+                    Icon(Icons.Rounded.PersonAdd, contentDescription = null)
+                    Spacer(Modifier.size(8.dp))
+                    Text("Nova visita", style = MaterialTheme.typography.titleMedium)
+                }
+            }
         },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier.padding(bottom = padding.calculateBottomPadding())
+        containerColor = MaterialTheme.colorScheme.background
     ) { p ->
         val l = state.data
         PullToRefreshBox(isRefreshing = state.loading && l != null, onRefresh = vm::refresh, modifier = Modifier.padding(p).fillMaxSize()) {
-            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp)) {
+            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)) {
                 item {
-                    FilterChips(
-                        listOf(
-                            FiltroVisitas.ESPERADOS to "Esperados" + (l?.esperados?.size?.let { " · $it" } ?: ""),
-                            FiltroVisitas.DENTRO to "No condomínio" + (l?.dentro?.size?.let { " · $it" } ?: ""),
-                            FiltroVisitas.HISTORICO to "Histórico"
-                        ),
-                        filtro, onSelect = { vm.filtro.value = it },
-                        modifier = Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp)
+                    val opcoes = listOf(
+                        FiltroVisitas.ESPERADOS to "Esperados" + (l?.esperados?.size?.let { " $it" } ?: ""),
+                        FiltroVisitas.DENTRO to "Dentro" + (l?.dentro?.size?.let { " $it" } ?: ""),
+                        FiltroVisitas.HISTORICO to "Saíram"
                     )
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        opcoes.forEachIndexed { i, (f, label) ->
+                            SegmentedButton(
+                                selected = filtro == f, onClick = { vm.filtro.value = f },
+                                shape = SegmentedButtonDefaults.itemShape(i, opcoes.size),
+                                colors = SegmentedButtonDefaults.colors(
+                                    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier.height(48.dp)
+                            ) { Text(label, maxLines = 1) }
+                        }
+                    }
                 }
                 when {
                     l == null && state.loading -> item { LoadingBox() }
@@ -140,22 +164,72 @@ fun VisitantesScreen(padding: PaddingValues, nav: PortariaNav, vm: VisitantesVie
                             FiltroVisitas.DENTRO -> l.dentro
                             FiltroVisitas.HISTORICO -> l.historico
                         }
-                        if (list.isEmpty()) item { EmptyBox(Icons.Rounded.Badge, "Nada por aqui", "Nenhum visitante neste filtro.") }
-                        else item {
-                            Spacer(Modifier.height(8.dp))
-                            CardList(list) { v -> VisitaRow(v) { nav.visitante(v.visitanteId) } }
+                        if (list.isEmpty()) item {
+                            EmptyBox(
+                                Icons.Rounded.Badge,
+                                when (filtro) { FiltroVisitas.ESPERADOS -> "Ninguém esperado agora"; FiltroVisitas.DENTRO -> "Nenhum visitante dentro"; else -> "Ninguém saiu hoje" },
+                                "As autorizações dos moradores aparecem aqui."
+                            )
+                        } else item {
+                            CardList(list) { v ->
+                                VisitaAcaoRow(
+                                    v, trabalhando = ocupado == v.visitanteId, onClick = { nav.visitante(v.visitanteId) },
+                                    onLiberar = { liberando = v }, onSaida = { vm.saida(v) }
+                                )
+                            }
                         }
                         if (l.bloqueados > 0) item {
                             Spacer(Modifier.height(14.dp))
                             Text(
                                 "${l.bloqueados} pessoa(s) na lista de bloqueados · ver",
-                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable(onClick = nav.bloqueados).padding(4.dp)
+                                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable(onClick = nav.bloqueados).padding(8.dp)
                             )
                         }
                     }
                 }
             }
+        }
+    }
+    liberando?.let { v -> LiberarSheet(v, onLiberar = { foto -> liberando = null; vm.liberar(v, foto) }, onDismiss = { liberando = null }) }
+}
+
+/** Linha da lista com a ação de um toque: Liberar (esperado), Ver (aguardando o morador) ou Saída (dentro). */
+@Composable
+private fun VisitaAcaoRow(v: Visita, trabalhando: Boolean, onClick: () -> Unit, onLiberar: () -> Unit, onSaida: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(Modifier.size(46.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+            Icon(v.tipo.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        }
+        Column(Modifier.weight(1f)) {
+            Text(v.nome, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.ext.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                listOfNotNull(v.unidade, v.obs ?: v.tipo.label).joinToString(" · "),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.ext.muted, maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+            when (v.status) {
+                StatusVisita.AGUARDANDO -> Text("Aguardando morador", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.ext.warn)
+                StatusVisita.DENTRO -> Text("entrou ${Fmt.hora(v.entradaEm)}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.ext.muted)
+                StatusVisita.SAIU -> Text("saiu ${Fmt.hora(v.saidaEm)}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.ext.muted)
+                StatusVisita.RECUSADO -> Text("recusado", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.ext.danger)
+                else -> v.janela?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.ext.muted) }
+            }
+        }
+        when (v.status) {
+            StatusVisita.ESPERADO, StatusVisita.LIBERADO ->
+                Button(onClick = onLiberar, enabled = !trabalhando, modifier = Modifier.height(46.dp).testTag("liberar_${v.visitanteId}")) { BusyOr(trabalhando) { Text("Liberar") } }
+            StatusVisita.AGUARDANDO ->
+                FilledTonalButton(
+                    onClick = onClick, modifier = Modifier.height(46.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.primary)
+                ) { Text("Ver") }
+            StatusVisita.DENTRO ->
+                OutlinedButton(onClick = onSaida, enabled = !trabalhando, modifier = Modifier.height(46.dp).testTag("saida_${v.visitanteId}")) { BusyOr(trabalhando) { Text("Saída") } }
+            else -> {}
         }
     }
 }
@@ -169,10 +243,13 @@ fun VisitanteScreen(nav: PortariaNav, vm: VisitanteViewModel = hiltViewModel()) 
     val context = LocalContext.current
     LaunchedEffect(Unit) { vm.refresh() }
     var liberarComo by remember { mutableStateOf(false) }
+    var fotoVia by remember { mutableStateOf<ViaLiberacao?>(null) }
+    var fotoSheet by remember { mutableStateOf(false) }
+    val foto by vm.foto.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { BackTopBar("Visitante", onBack = nav.back) },
-        bottomBar = { state.data?.let { v -> VisitanteAcoes(v, busy, onLiberar = { if (v.status == StatusVisita.AGUARDANDO) liberarComo = true else vm.liberar() }, onRecusar = { vm.recusar() }, onSaida = { vm.saida() }, onConsultar = vm::consultar) } },
+        bottomBar = { state.data?.let { v -> VisitanteAcoes(v, busy, onLiberar = { if (v.status == StatusVisita.AGUARDANDO) liberarComo = true else { fotoVia = null; fotoSheet = true } }, onRecusar = { vm.recusar() }, onSaida = { vm.saida() }, onConsultar = vm::consultar) } },
         containerColor = MaterialTheme.colorScheme.background
     ) { p ->
         val v = state.data
@@ -181,6 +258,14 @@ fun VisitanteScreen(nav: PortariaNav, vm: VisitanteViewModel = hiltViewModel()) 
                 v == null && state.loading -> LoadingBox()
                 v == null -> ErrorBox(state.error ?: "Não deu para carregar.", onRetry = vm::refresh)
                 else -> {
+                    val bmp = remember(foto) { Photos.decode(foto) }
+                    if (bmp != null) {
+                        Image(
+                            bmp.asImageBitmap(), contentDescription = "Foto de ${v.nome}", contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth().height(220.dp).clip(MaterialTheme.shapes.large)
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
                     AppCard {
                         Column(Modifier.padding(16.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -252,6 +337,7 @@ fun VisitanteScreen(nav: PortariaNav, vm: VisitanteViewModel = hiltViewModel()) 
         }
     }
 
+    if (fotoSheet) state.data?.let { v -> LiberarSheet(v, onLiberar = { f -> fotoSheet = false; vm.liberar(fotoVia, f) }, onDismiss = { fotoSheet = false }) }
     if (liberarComo) {
         ModalBottomSheet(onDismissRequest = { liberarComo = false }) {
             Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp).navigationBarsPadding()) {
@@ -259,7 +345,7 @@ fun VisitanteScreen(nav: PortariaNav, vm: VisitanteViewModel = hiltViewModel()) 
                 Spacer(Modifier.height(6.dp))
                 Text("Registre como a entrada foi confirmada.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.ext.muted)
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { liberarComo = false; vm.liberar(ViaLiberacao.INTERFONE) }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
+                Button(onClick = { liberarComo = false; fotoVia = ViaLiberacao.INTERFONE; fotoSheet = true }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
                     Icon(Icons.Rounded.Call, contentDescription = null); Spacer(Modifier.size(8.dp)); Text("Morador confirmou pelo interfone")
                 }
                 Spacer(Modifier.height(8.dp))

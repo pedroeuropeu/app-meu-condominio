@@ -46,6 +46,9 @@ interface PortariaRepository {
     suspend fun desfazerEntrega(id: Long): Outcome<Encomenda>
     /** foto tirada na chegada (null quando não há) */
     suspend fun fotoEncomenda(id: Long): Outcome<ByteArray?>
+    /** foto de quem entrou, tirada ao liberar (POST /portaria/acessos/{id}/foto) */
+    suspend fun fotoAcesso(acessoId: Long, foto: ByteArray): Outcome<Visita>
+    suspend fun verFotoAcesso(acessoId: Long): Outcome<ByteArray?>
 }
 
 /** App do morador: boletos, visitantes, encomendas e avisos da própria unidade. */

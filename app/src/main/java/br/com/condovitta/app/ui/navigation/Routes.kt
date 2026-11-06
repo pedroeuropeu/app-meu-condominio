@@ -27,7 +27,8 @@ import kotlinx.serialization.Serializable
 /* Rotas tipadas (Navigation Compose). Cada modo tem a sua barra inferior e uma pilha por aba. */
 
 @Serializable data object PortPainel
-@Serializable data object PortVisitantes
+/** [dentro]: abre já em "No condomínio" (o botão do Início) */
+@Serializable data class PortVisitantes(val dentro: Boolean = false)
 @Serializable data object PortEncomendas
 @Serializable data object PortMais
 

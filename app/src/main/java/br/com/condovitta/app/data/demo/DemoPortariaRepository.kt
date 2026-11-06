@@ -313,6 +313,15 @@ class DemoPortariaRepository @Inject constructor(private val time: TimeProvider)
 
     override suspend fun fotoEncomenda(id: Long): Outcome<ByteArray?> = op { fotos[id] }
 
+    private val fotosAcesso = mutableMapOf<Long, ByteArray>()
+
+    override suspend fun fotoAcesso(acessoId: Long, foto: ByteArray): Outcome<Visita> = op {
+        fotosAcesso[acessoId] = foto
+        troca({ it.acessoId == acessoId }) { it.copy(temFoto = true) }
+    }
+
+    override suspend fun verFotoAcesso(acessoId: Long): Outcome<ByteArray?> = op { fotosAcesso[acessoId] }
+
     companion object {
         val RESPONSAVEIS = linkedMapOf(
             "A-102" to "Roberto Lima", "A-205" to "Felipe Araújo", "A-302" to "Vinícius Ramos", "A-403" to "Tatiane Gomes", "A-501" to "Marcos Teixeira", "A-604" to "Helena Castro",

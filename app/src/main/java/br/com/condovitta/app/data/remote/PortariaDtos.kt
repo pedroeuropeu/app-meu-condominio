@@ -54,6 +54,7 @@ data class VisitaDto(
     val respondidoPor: String? = null,
     val recado: String? = null,
     val autorizadoPor: String? = null,
+    val temFoto: Boolean = false,
     val avisar: Boolean = false
 )
 
@@ -189,7 +190,7 @@ fun VisitaDto.toDomain() = Visita(
     inicio = hhmm(inicio), fim = hhmm(fim), entradaEm = dateTime(entradaEm), saidaEm = dateTime(saidaEm), porteiro = porteiro,
     daPortaria = origem == "PORTARIA", recorrencia = recorrencia, obs = obs, via = ViaLiberacao.of(via),
     consultadoEm = dateTime(consultadoEm), respondidoEm = dateTime(respondidoEm), respondidoPor = respondidoPor,
-    recado = recado, autorizadoPor = autorizadoPor
+    recado = recado, autorizadoPor = autorizadoPor, temFoto = temFoto
 )
 
 fun ListasDto.toDomain() = AcessoListas(esperados.map { it.toDomain() }, dentro.map { it.toDomain() }, historico.map { it.toDomain() }, bloqueados)

@@ -1,5 +1,7 @@
 package br.com.condovitta.app.feature.portaria
 
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.shape.RoundedCornerShape
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -97,7 +99,7 @@ import kotlinx.coroutines.withContext
 /* ------------------------------------------------------------------ Encomendas (aba) */
 
 @Composable
-fun EncomendasScreen(padding: PaddingValues, nav: PortariaNav, vm: EncomendasViewModel = hiltViewModel()) {
+fun EncomendasScreen(nav: PortariaNav, vm: EncomendasViewModel = hiltViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val filtro by vm.filtro.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
@@ -105,7 +107,7 @@ fun EncomendasScreen(padding: PaddingValues, nav: PortariaNav, vm: EncomendasVie
         onPauseOrDispose { }
     }
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Encomendas", style = MaterialTheme.typography.titleLarge) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)) },
+        topBar = { BackTopBar("Encomendas", onBack = nav.back) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = nav.novaEncomenda, icon = { Icon(Icons.Rounded.Inventory2, contentDescription = null) }, text = { Text("Registrar") },
@@ -113,8 +115,7 @@ fun EncomendasScreen(padding: PaddingValues, nav: PortariaNav, vm: EncomendasVie
                 modifier = Modifier.testTag("fab_registrar_encomenda")
             )
         },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier.padding(bottom = padding.calculateBottomPadding())
+        containerColor = MaterialTheme.colorScheme.background
     ) { p ->
         val d = state.data
         PullToRefreshBox(isRefreshing = state.loading && d != null, onRefresh = vm::refresh, modifier = Modifier.padding(p).fillMaxSize()) {
@@ -338,17 +339,30 @@ private fun chipColors() = FilterChipDefaults.filterChipColors(selectedContainer
 
 /* ------------------------------------------------------------------ Registrar encomenda */
 
+/**
+ * Registrar encomenda em 2 passos, com botões grandes: (1) a unidade no teclado (bloco + número, confere o nome do
+ * morador); (2) a foto e a transportadora. Gera o código de retirada e avisa o morador.
+ */
 @Composable
 fun NovaEncomendaScreen(nav: PortariaNav, vm: NovaEncomendaViewModel = hiltViewModel()) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val unidades by vm.unidades.collectAsStateWithLifecycle()
     val done by vm.done.collectAsStateWithLifecycle()
+    var passo by rememberSaveable { mutableStateOf(1) }
+    var bloco by rememberSaveable { mutableStateOf<String?>(null) }
+    var numero by rememberSaveable { mutableStateOf("") }
     var picker by rememberSaveable { mutableStateOf(false) }
+    var mais by rememberSaveable { mutableStateOf(false) }
     var captureUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var processando by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     LaunchedEffect(done) { if (done) nav.back() }
+
+    val blocos = remember(unidades) { unidades.mapNotNull { it.bloco?.takeIf(String::isNotBlank) }.distinct().sorted() }
+    LaunchedEffect(blocos) { if (bloco == null && blocos.size == 1) bloco = blocos.first() }
+    val achada = remember(unidades, bloco, numero) { Portaria.acharUnidade(unidades, bloco, numero) }
+    LaunchedEffect(achada?.id) { if (achada != null && ui.unidade?.id != achada.id) vm.unidade(achada) }
 
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val uri = captureUri
@@ -366,90 +380,145 @@ fun NovaEncomendaScreen(nav: PortariaNav, vm: NovaEncomendaViewModel = hiltViewM
     }
 
     Scaffold(
-        topBar = { BackTopBar("Registrar encomenda", onBack = nav.back) },
+        topBar = { BackTopBar("Registrar encomenda", onBack = { if (passo == 2) passo = 1 else nav.back() }) },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, shadowElevation = 8.dp) {
-                Button(
-                    onClick = vm::salvar, enabled = ui.valido && !ui.saving,
-                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp).height(52.dp).testTag("encomenda_salvar")
-                ) { BusyOr(ui.saving) { Icon(Icons.Rounded.NotificationsActive, contentDescription = null); Spacer(Modifier.size(8.dp)); Text("Registrar e avisar morador") } }
+            Surface(color = MaterialTheme.colorScheme.background) {
+                val mod = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp).height(58.dp)
+                if (passo == 1) {
+                    Button(onClick = { passo = 2 }, enabled = ui.unidade != null, modifier = mod.testTag("encomenda_continuar")) {
+                        Text("Continuar", style = MaterialTheme.typography.titleMedium)
+                    }
+                } else {
+                    Button(onClick = vm::salvar, enabled = ui.valido && !ui.saving, modifier = mod.testTag("encomenda_salvar")) {
+                        BusyOr(ui.saving) { Icon(Icons.Rounded.NotificationsActive, contentDescription = null); Spacer(Modifier.size(8.dp)); Text("Registrar e avisar", style = MaterialTheme.typography.titleMedium) }
+                    }
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { p ->
         Column(Modifier.padding(p).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            Text("Chegou um pacote. Em poucos toques o morador é avisado com o código de retirada.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.ext.muted)
-            Spacer(Modifier.height(16.dp))
-
-            FieldLabel("Unidade de destino")
-            Surface(
-                onClick = { picker = true }, shape = MaterialTheme.shapes.small, color = MaterialTheme.ext.card,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.fillMaxWidth().testTag("encomenda_unidade")
-            ) {
-                Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.Apartment, contentDescription = null, tint = MaterialTheme.ext.muted)
-                    Spacer(Modifier.size(10.dp))
-                    Text(ui.unidade?.let { "${it.rotulo} · ${it.responsavel ?: "Sem morador"}" } ?: "Escolher a unidade…", color = if (ui.unidade != null) MaterialTheme.ext.ink else MaterialTheme.ext.muted)
-                }
-            }
-            if (ui.destinatarios.size > 1) {
-                Spacer(Modifier.height(12.dp))
-                FieldLabel("Destinatário")
-                ChipRow(ui.destinatarios, ui.destinatario) { d -> vm.update { it.copy(destinatario = d) } }
-            }
-
-            Spacer(Modifier.height(16.dp))
-            FieldLabel("Transportadora")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Portaria.TRANSPORTADORAS.forEach { t ->
-                    FilterChip(ui.transportadora == t, { vm.update { it.copy(transportadora = t) } }, label = { Text(t) }, colors = chipColors())
-                }
-            }
-
+            Text(
+                if (passo == 1) "Passo 1 de 2 · Para qual unidade?" else "Passo 2 de 2 · Foto e transportadora",
+                style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.ext.muted
+            )
             Spacer(Modifier.height(12.dp))
-            FieldLabel("Tamanho")
-            ChipRow(TamanhoEncomenda.entries.map { it.label }, ui.tamanho?.label) { l -> vm.update { it.copy(tamanho = TamanhoEncomenda.entries.first { t -> t.label == l }) } }
-
-            Spacer(Modifier.height(16.dp))
-            FieldLabel("Foto do pacote")
-            val bmp = remember(ui.foto) { Photos.decode(ui.foto) }
-            if (bmp != null) {
-                Box {
-                    Image(bmp.asImageBitmap(), contentDescription = "Foto do pacote", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(200.dp).clip(MaterialTheme.shapes.large))
-                    TextButton(onClick = ::tirarFoto, modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)) {
-                        Surface(color = Color.Black.copy(alpha = 0.55f), shape = MaterialTheme.shapes.small) { Text("Refazer", color = Color.White, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) }
+            if (passo == 1) {
+                if (blocos.size > 1) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        blocos.forEach { b ->
+                            Tecla(b, selecionada = bloco == b, modifier = Modifier.weight(1f)) { bloco = b; numero = "" }
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                AppCard {
+                    Column(Modifier.fillMaxWidth().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            listOfNotNull(bloco, numero.ifEmpty { "—" }).joinToString("-"),
+                            style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.ext.ink,
+                            modifier = Modifier.testTag("encomenda_unidade_digitada")
+                        )
+                        val u = ui.unidade
+                        Text(
+                            when {
+                                u != null && achada != null -> listOfNotNull(u.rotulo, ui.destinatarios.joinToString().ifBlank { u.responsavel ?: "Sem morador cadastrado" }).joinToString(" · ")
+                                numero.isNotEmpty() -> "Unidade não encontrada"
+                                else -> "Digite o número do apartamento"
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (achada != null) MaterialTheme.colorScheme.primary else MaterialTheme.ext.muted,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
-            } else PhotoPlaceholder(if (processando) "Preparando a foto…" else "Tirar foto", Icons.Rounded.AddAPhoto, onClick = ::tirarFoto)
-
-            Spacer(Modifier.height(16.dp))
-            FieldLabel("Onde vai guardar")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Portaria.LOCAIS.forEach { l ->
-                    FilterChip(ui.local == l, { vm.update { it.copy(local = l) } }, label = { Text(l) }, colors = chipColors())
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            Surface(shape = MaterialTheme.shapes.medium, color = Color(0xFF0891B2).copy(alpha = 0.10f), modifier = Modifier.fillMaxWidth()) {
-                Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.WaterDrop, contentDescription = null, tint = Color(0xFF0891B2))
-                    Text("É perecível (vai para a geladeira)", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).padding(start = 10.dp))
-                    Switch(ui.perecivel, vm::perecivel)
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(ui.rastreio, { v -> vm.update { it.copy(rastreio = v) } }, label = { Text("Código de rastreio (opcional)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            if (ui.error != null) {
                 Spacer(Modifier.height(12.dp))
-                NoteBox(Icons.Rounded.ErrorOutline, MaterialTheme.colorScheme.error, ui.error!!)
+                listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("⌫", "0", "Limpar")).forEach { linha ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        linha.forEach { k ->
+                            Tecla(k, modifier = Modifier.weight(1f)) {
+                                numero = when (k) { "⌫" -> numero.dropLast(1); "Limpar" -> ""; else -> (numero + k).take(5) }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                }
+                TextButton(onClick = { picker = true }, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Procurar na lista de unidades") }
+            } else {
+                val bmp = remember(ui.foto) { Photos.decode(ui.foto) }
+                if (bmp != null) {
+                    Box {
+                        Image(bmp.asImageBitmap(), contentDescription = "Foto do pacote", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(220.dp).clip(MaterialTheme.shapes.large))
+                        TextButton(onClick = ::tirarFoto, modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)) {
+                            Surface(color = Color.Black.copy(alpha = 0.55f), shape = MaterialTheme.shapes.small) { Text("Refazer", color = Color.White, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)) }
+                        }
+                    }
+                } else PhotoPlaceholder(if (processando) "Preparando a foto…" else "Tirar foto do pacote", Icons.Rounded.AddAPhoto, onClick = ::tirarFoto)
+
+                Spacer(Modifier.height(16.dp))
+                FieldLabel("Transportadora")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Portaria.TRANSPORTADORAS.forEach { t ->
+                        FilterChip(ui.transportadora == t, { vm.update { it.copy(transportadora = t) } }, label = { Text(t, style = MaterialTheme.typography.bodyLarge) }, colors = chipColors(), modifier = Modifier.height(44.dp))
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Surface(shape = MaterialTheme.shapes.medium, color = Color(0xFF0891B2).copy(alpha = 0.10f), modifier = Modifier.fillMaxWidth()) {
+                    Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Rounded.WaterDrop, contentDescription = null, tint = Color(0xFF0891B2))
+                        Text("É perecível (vai para a geladeira)", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f).padding(start = 10.dp))
+                        Switch(ui.perecivel, vm::perecivel)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = { mais = !mais }) { Text(if (mais) "Menos detalhes" else "Mais detalhes (destinatário, tamanho, local, rastreio)") }
+                if (mais) {
+                    if (ui.destinatarios.size > 1) {
+                        FieldLabel("Destinatário")
+                        ChipRow(ui.destinatarios, ui.destinatario) { d -> vm.update { it.copy(destinatario = d) } }
+                        Spacer(Modifier.height(12.dp))
+                    }
+                    FieldLabel("Tamanho")
+                    ChipRow(TamanhoEncomenda.entries.map { it.label }, ui.tamanho?.label) { l -> vm.update { it.copy(tamanho = TamanhoEncomenda.entries.first { t -> t.label == l }) } }
+                    Spacer(Modifier.height(12.dp))
+                    FieldLabel("Onde vai guardar")
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Portaria.LOCAIS.forEach { l -> FilterChip(ui.local == l, { vm.update { it.copy(local = l) } }, label = { Text(l) }, colors = chipColors()) }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(ui.rastreio, { v -> vm.update { it.copy(rastreio = v) } }, label = { Text("Código de rastreio (opcional)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                }
+                if (ui.error != null) {
+                    Spacer(Modifier.height(12.dp))
+                    NoteBox(Icons.Rounded.ErrorOutline, MaterialTheme.colorScheme.error, ui.error!!)
+                }
+                Spacer(Modifier.height(24.dp))
             }
-            Spacer(Modifier.height(12.dp))
-            NoteBox(Icons.Rounded.Info, MaterialTheme.colorScheme.primary, "O sistema gera o código de retirada e avisa o morador no app e por e-mail.")
-            Spacer(Modifier.height(24.dp))
         }
     }
 
-    if (picker) UnidadePicker(unidades, permitirCondominio = false, onPick = { u -> picker = false; u?.let(vm::unidade) }, onDismiss = { picker = false })
+    if (picker) UnidadePicker(unidades, permitirCondominio = false, onPick = { u ->
+        picker = false
+        u?.let { bloco = it.bloco; numero = Portaria.numeroDa(it); vm.unidade(it) }
+    }, onDismiss = { picker = false })
+}
+
+/** Tecla grande do teclado de unidade. */
+@Composable
+private fun Tecla(texto: String, modifier: Modifier = Modifier, selecionada: Boolean = false, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick, shape = RoundedCornerShape(16.dp),
+        color = if (selecionada) MaterialTheme.colorScheme.primary else MaterialTheme.ext.card,
+        border = if (selecionada) null else BorderStroke(1.dp, MaterialTheme.ext.cardBorder),
+        modifier = modifier.height(58.dp).testTag("tecla_$texto")
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                texto, style = if (texto.length > 2) MaterialTheme.typography.titleSmall else MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold, color = if (selecionada) MaterialTheme.colorScheme.onPrimary else MaterialTheme.ext.ink
+            )
+        }
+    }
 }
 
 @Composable

@@ -65,7 +65,8 @@ fun ModeShell(
         modifier = Modifier.testTag(tag),
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (onTab) {
+            // um modo com uma tela só (Portaria) não tem barra: o Início é o ponto de partida de tudo
+            if (onTab && tabs.size > 1) {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest) {
                     tabs.forEach { tab ->
                         val selected = dest?.hierarchy?.any { it.hasRoute(tab.routeClass) } == true

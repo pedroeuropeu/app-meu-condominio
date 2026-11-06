@@ -71,7 +71,7 @@ fun EscolhaPerfilScreen(me: Me, disponiveis: List<Perfil>, onEscolher: (Perfil) 
                 val portaria = p.modo == Modo.PORTARIA
                 PerfilCard(
                     icon = if (portaria) Icons.Rounded.Shield else Icons.Rounded.Apartment,
-                    color = if (portaria) Brand.Amber else Brand.Blue,
+                    color = if (portaria) Brand.PortariaBlue else Brand.Blue,
                     title = if (portaria) "Modo Portaria" else "App do morador",
                     description = buildString {
                         append(if (portaria) "Rápido para a guarita: encomendas, visitantes e liberação de entrada." else "Completo: reservas, boletos, encomendas, avisos e mais.")

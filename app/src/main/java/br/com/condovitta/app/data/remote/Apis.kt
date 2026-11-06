@@ -94,6 +94,13 @@ interface PortariaApi {
 
     @GET("api/v1/encomendas/{id}/foto")
     suspend fun fotoEncomenda(@Path("id") id: Long): ResponseBody
+
+    @Multipart
+    @POST("api/v1/portaria/acessos/{id}/foto")
+    suspend fun fotoAcesso(@Path("id") acessoId: Long, @Part foto: MultipartBody.Part): VisitaDto
+
+    @GET("api/v1/portaria/acessos/{id}/foto")
+    suspend fun verFotoAcesso(@Path("id") acessoId: Long): ResponseBody
 }
 
 /** App do morador: BoletoController, VisitanteController, EncomendaController e ComunicadoController. */

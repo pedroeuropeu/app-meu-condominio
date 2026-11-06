@@ -1,6 +1,25 @@
 package br.com.condovitta.app.feature.portaria
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,12 +33,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Apartment
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.LocalShipping
 import androidx.compose.material.icons.rounded.PersonAdd
@@ -30,14 +46,12 @@ import androidx.compose.ui.platform.LocalContext
 import br.com.condovitta.app.core.common.codigoDoQr
 import br.com.condovitta.app.core.common.lerQr
 import br.com.condovitta.app.ui.Messenger
-import androidx.compose.material.icons.rounded.SensorOccupied
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -64,9 +78,6 @@ import br.com.condovitta.app.core.designsystem.ext
 import br.com.condovitta.app.domain.Busca
 import br.com.condovitta.app.domain.Me
 import br.com.condovitta.app.domain.Perfil
-import br.com.condovitta.app.feature.home.GreetingHero
-import br.com.condovitta.app.feature.home.QuickAction
-import br.com.condovitta.app.feature.home.QuickActions
 import kotlinx.coroutines.delay
 
 /** Para onde as telas da portaria levam (o grafo do modo liga cada um à sua rota). */
@@ -80,10 +91,17 @@ data class PortariaNav(
     val abaEncomendas: () -> Unit,
     val soon: (String) -> Unit,
     val back: () -> Unit,
-    val notificacoes: () -> Unit = {}
+    val notificacoes: () -> Unit = {},
+    /** visitantes já abertos em "No condomínio" */
+    val dentro: () -> Unit = abaVisitantes,
+    /** menu da portaria (rotina e conta) */
+    val menu: () -> Unit = {}
 )
 
-/** A tela que o porteiro mais usa: busca grande, números do turno, ações de um toque e quem está chegando. */
+/**
+ * Início da portaria: cabeçalho escuro com a busca (nome, unidade, placa ou QR) e 6 botões grandes de um toque. Os números
+ * do turno ficam nos próprios botões; o resto da rotina está no menu do cabeçalho.
+ */
 @Composable
 fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNav, messenger: Messenger, naoLidas: Long = 0, vm: PainelViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -112,11 +130,11 @@ fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNa
     ) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             val p = painel.data
-            GreetingHero(
-                me.iniciais, listOfNotNull("Portaria", p?.turno?.let { "turno da $it" }, p?.faixa).joinToString(" · "),
-                me.primeiroNome, perfil.condominioNome, onBell = nav.notificacoes, naoLidas = naoLidas
+            PortariaHero(
+                me.iniciais, listOfNotNull("Portaria", p?.turno?.let { "turno da $it" }).joinToString(" · ").uppercase(),
+                me.primeiroNome, perfil.condominioNome, naoLidas, onBell = nav.notificacoes, onMenu = nav.menu
             ) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(18.dp))
                 TextField(
                     value = query, onValueChange = ::onQuery,
                     placeholder = { Text("Buscar morador, unidade ou placa…") },
@@ -130,16 +148,16 @@ fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNa
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White, unfocusedContainerColor = Color.White.copy(alpha = 0.94f),
+                        focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
                         focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
-                        focusedTextColor = Color(0xFF0A2C4E), unfocusedTextColor = Color(0xFF0A2C4E),
-                        focusedPlaceholderColor = Color(0xFF5B6B82), unfocusedPlaceholderColor = Color(0xFF5B6B82),
-                        focusedLeadingIconColor = Color(0xFF5B6B82), unfocusedLeadingIconColor = Color(0xFF5B6B82),
-                        focusedTrailingIconColor = Color(0xFF5B6B82), unfocusedTrailingIconColor = Color(0xFF5B6B82)
+                        focusedTextColor = Color(0xFF111827), unfocusedTextColor = Color(0xFF111827),
+                        focusedPlaceholderColor = Color(0xFF94A3B8), unfocusedPlaceholderColor = Color(0xFF94A3B8),
+                        focusedLeadingIconColor = Color(0xFF94A3B8), unfocusedLeadingIconColor = Color(0xFF94A3B8),
+                        focusedTrailingIconColor = Color(0xFF64748B), unfocusedTrailingIconColor = Color(0xFF64748B)
                     ),
-                    modifier = Modifier.fillMaxWidth().testTag("painel_busca")
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp).testTag("painel_busca")
                 )
             }
 
@@ -156,63 +174,100 @@ fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNa
                     return@Column
                 }
 
-                when {
-                    p == null && painel.loading -> LoadingBox()
-                    p == null -> ErrorBox(painel.error ?: "Não deu para carregar o painel.", onRetry = { vm.refresh() })
-                    else -> {
-                        Spacer(Modifier.height(14.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Kpi(Icons.Rounded.Schedule, Color(0xFF1F4FE0), p.esperados.size.toString(), "Esperados hoje", Modifier.weight(1f), onClick = nav.abaVisitantes)
-                            Kpi(Icons.Rounded.SensorOccupied, Color(0xFF059669), p.dentro.size.toString(), "No condomínio", Modifier.weight(1f), onClick = nav.abaVisitantes)
-                            Kpi(Icons.Rounded.Inventory2, Color(0xFFD97706), p.encomendasAguardando.toString(), "Encomendas", Modifier.weight(1f), onClick = nav.abaEncomendas)
-                        }
-                        if (p.pereciveis.isNotEmpty()) {
-                            Spacer(Modifier.height(12.dp))
-                            NoteBox(
-                                Icons.Rounded.WaterDrop, Color(0xFF0891B2),
-                                "${p.pereciveis.size} perecível(is) na geladeira: " + p.pereciveis.joinToString { it.unidade } + "."
-                            )
-                        }
-                        if (p.encomendasParadas7 > 0) {
-                            Spacer(Modifier.height(10.dp))
-                            NoteBox(Icons.Rounded.Warning, MaterialTheme.ext.danger, "${p.encomendasParadas7} encomenda(s) parada(s) há mais de 7 dias.")
-                        }
-
-                        SectionHeader("Ações rápidas")
-                        QuickActions(
-                            listOf(
-                                QuickAction("Registrar encomenda", Icons.Rounded.Inventory2, Color(0xFFD97706), nav.novaEncomenda),
-                                QuickAction("Nova visita", Icons.Rounded.PersonAdd, Color(0xFF1F4FE0), nav.novaVisita),
-                                QuickAction("Entregar", Icons.Rounded.LocalShipping, Color(0xFF059669), nav.abaEncomendas),
-                                QuickAction("Bloqueados", Icons.Rounded.Block, Color(0xFFDC2626), nav.bloqueados),
-                                QuickAction("Reservas de hoje", Icons.Rounded.Event, Color(0xFF7C3AED)) { nav.soon("port/reservas") },
-                                QuickAction("Livro", Icons.AutoMirrored.Rounded.MenuBook, Color(0xFF64748B)) { nav.soon("port/livro") }
-                            )
-                        )
-
-                        SectionTitleLink("Esperados agora", nav.abaVisitantes)
-                        if (p.esperados.isEmpty()) EmptyBox(Icons.Rounded.Schedule, "Ninguém esperado agora", "As autorizações dos moradores aparecem aqui.")
-                        else CardList(p.esperados.take(3)) { v -> VisitaRow(v) { nav.visitante(v.visitanteId) } }
-
-                        SectionTitleLink("No condomínio agora", nav.abaVisitantes)
-                        if (p.dentro.isEmpty()) EmptyBox(Icons.Rounded.SensorOccupied, "Nenhum visitante dentro", "Quem entrar aparece aqui até registrar a saída.")
-                        else CardList(p.dentro.take(3)) { v -> VisitaRow(v) { nav.visitante(v.visitanteId) } }
-                        Spacer(Modifier.height(96.dp))
+                Spacer(Modifier.height(16.dp))
+                if (p == null && !painel.loading) {
+                    ErrorBox(painel.error ?: "Não deu para carregar o painel.", onRetry = { vm.refresh() })
+                }
+                // os botões aparecem mesmo antes de carregar: o porteiro não espera a rede para registrar um pacote
+                val botoes = listOf(
+                    BotaoPortaria("Registrar encomenda", Icons.Rounded.Inventory2, "porteiro_registrar_encomenda", onClick = nav.novaEncomenda),
+                    BotaoPortaria("Entregar", Icons.Rounded.LocalShipping, "porteiro_entregar", p?.encomendasAguardando?.toInt(), onClick = nav.abaEncomendas),
+                    BotaoPortaria("Nova visita", Icons.Rounded.PersonAdd, "porteiro_nova_visita", onClick = nav.novaVisita),
+                    BotaoPortaria("Esperados", Icons.Rounded.Schedule, "porteiro_esperados", p?.esperados?.size, onClick = nav.abaVisitantes),
+                    BotaoPortaria("No condomínio", Icons.Rounded.Groups, "porteiro_dentro", p?.dentro?.size, contadorNeutro = true, onClick = nav.dentro),
+                    BotaoPortaria("Livro", Icons.AutoMirrored.Rounded.MenuBook, "porteiro_livro", onClick = { nav.soon("port/livro") })
+                )
+                botoes.chunked(2).forEach { linha ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        linha.forEach { BotaoGrande(it, Modifier.weight(1f)) }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                if (p != null) {
+                    if (p.pereciveis.isNotEmpty()) {
+                        NoteBox(Icons.Rounded.WaterDrop, Color(0xFF0891B2), "${p.pereciveis.size} perecível(is) na geladeira: " + p.pereciveis.joinToString { it.unidade } + ".")
+                        Spacer(Modifier.height(10.dp))
+                    }
+                    if (p.encomendasParadas7 > 0) {
+                        NoteBox(Icons.Rounded.Warning, MaterialTheme.ext.danger, "${p.encomendasParadas7} encomenda(s) parada(s) há mais de 7 dias.")
+                        Spacer(Modifier.height(10.dp))
                     }
                 }
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
 }
 
+/** Um botão grande do Início (contador opcional no canto). */
+data class BotaoPortaria(val label: String, val icon: ImageVector, val tag: String, val contador: Int? = null, val contadorNeutro: Boolean = false, val onClick: () -> Unit)
+
 @Composable
-private fun SectionTitleLink(title: String, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) { SectionHeader(title) }
-        TextButton(onClick = onClick, modifier = Modifier.padding(top = 10.dp)) {
-            Text("Ver todos")
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+private fun BotaoGrande(b: BotaoPortaria, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = b.onClick, shape = RoundedCornerShape(24.dp), color = MaterialTheme.ext.card,
+        border = BorderStroke(1.dp, MaterialTheme.ext.cardBorder),
+        modifier = modifier.heightIn(min = 150.dp).testTag(b.tag)
+    ) {
+        Box(Modifier.fillMaxWidth().padding(12.dp)) {
+            Column(Modifier.align(Alignment.Center).padding(top = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+                    Icon(b.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    b.label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.ext.ink,
+                    textAlign = TextAlign.Center, maxLines = 2
+                )
+            }
+            val n = b.contador
+            if (n != null && n > 0) {
+                Box(
+                    Modifier.align(Alignment.TopEnd).clip(CircleShape)
+                        .background(if (b.contadorNeutro) MaterialTheme.ext.muted else MaterialTheme.ext.danger)
+                        .heightIn(min = 26.dp).padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) { Text(if (n > 99) "99+" else "$n", color = Color.White, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) }
+            }
         }
+    }
+}
+
+/** Cabeçalho escuro da portaria: quem está no turno, o condomínio, o sino e o menu. */
+@Composable
+fun PortariaHero(initials: String, kicker: String, nome: String, condominio: String, naoLidas: Long, onBell: () -> Unit, onMenu: () -> Unit, extra: @Composable () -> Unit = {}) {
+    br.com.condovitta.app.core.designsystem.Hero {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.08f)).border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) { Text(initials, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(kicker, style = MaterialTheme.typography.labelMedium, letterSpacing = 1.sp, color = Color.White.copy(alpha = 0.8f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Olá, $nome", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(condominio, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            BadgedBox(badge = { if (naoLidas > 0) Badge { Text(if (naoLidas > 9) "9+" else "$naoLidas") } }) {
+                IconButton(onClick = onBell, modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.10f))) {
+                    Icon(Icons.Rounded.Notifications, contentDescription = if (naoLidas > 0) "Notificações, $naoLidas não lidas" else "Notificações", tint = Color.White)
+                }
+            }
+            Spacer(Modifier.size(8.dp))
+            IconButton(onClick = onMenu, modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.10f)).testTag("portaria_menu")) {
+                Icon(Icons.Rounded.Menu, contentDescription = "Menu da portaria", tint = Color.White)
+            }
+        }
+        extra()
     }
 }
 

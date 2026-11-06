@@ -42,8 +42,16 @@ class LoginViewModel @Inject constructor(
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
 
     init {
+        reiniciar()
+    }
+
+    /**
+     * Formulário limpo a cada vez que o login aparece (o ViewModel vive com a Activity e sobrevive ao logout). Abre com o
+     * último e-mail, menos depois de "Passar o turno": aí fica vazio para o próximo porteiro.
+     */
+    fun reiniciar() {
+        _state.value = LoginUiState()
         viewModelScope.launch {
-            // depois de "Passar o turno" o login fica vazio para o próximo porteiro
             if (auth.lastEnd.value == SessionEnd.TURNO_PASSADO) return@launch
             val last = settings.current().lastEmail
             if (last != null) _state.update { if (it.email.isEmpty()) it.copy(email = last) else it }

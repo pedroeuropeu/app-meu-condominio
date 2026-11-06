@@ -79,12 +79,13 @@ data class PortariaNav(
     val abaVisitantes: () -> Unit,
     val abaEncomendas: () -> Unit,
     val soon: (String) -> Unit,
-    val back: () -> Unit
+    val back: () -> Unit,
+    val notificacoes: () -> Unit = {}
 )
 
 /** A tela que o porteiro mais usa: busca grande, números do turno, ações de um toque e quem está chegando. */
 @Composable
-fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNav, messenger: Messenger, vm: PainelViewModel = hiltViewModel()) {
+fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNav, messenger: Messenger, naoLidas: Long = 0, vm: PainelViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val painel by vm.painel.collectAsStateWithLifecycle()
     // o texto fica no próprio campo (síncrono); o ViewModel recebe e busca com atraso
@@ -113,7 +114,7 @@ fun PainelScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: PortariaNa
             val p = painel.data
             GreetingHero(
                 me.iniciais, listOfNotNull("Portaria", p?.turno?.let { "turno da $it" }, p?.faixa).joinToString(" · "),
-                me.primeiroNome, perfil.condominioNome, onBell = { nav.soon("port/notifs") }
+                me.primeiroNome, perfil.condominioNome, onBell = nav.notificacoes, naoLidas = naoLidas
             ) {
                 Spacer(Modifier.height(16.dp))
                 TextField(

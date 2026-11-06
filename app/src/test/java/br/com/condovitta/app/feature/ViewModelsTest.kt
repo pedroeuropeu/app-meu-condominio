@@ -105,4 +105,17 @@ class ViewModelsTest {
         val vm = LoginViewModel(auth, settings)
         assertThat(vm.state.first { it.email.isNotEmpty() }.email).isEqualTo("carlos@condominio.local")
     }
+
+    @Test fun `login volta limpo depois de passar o turno`() = runTest {
+        settings.setLastEmail("carlos@condominio.local")
+        auth.login("portaria@condominio.local", "x", remember = true)
+        val vm = LoginViewModel(auth, settings)
+        vm.state.first { it.email.isNotEmpty() }
+        vm.onPassword("segredo")
+        auth.logout(SessionEnd.TURNO_PASSADO)
+        vm.reiniciar()
+        advanceUntilIdle()
+        assertThat(vm.state.value.email).isEmpty()
+        assertThat(vm.state.value.password).isEmpty()
+    }
 }

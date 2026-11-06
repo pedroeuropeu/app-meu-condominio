@@ -125,5 +125,13 @@ object NetworkModule {
         retrofit(client).create(br.com.condovitta.app.data.remote.ReservasApi::class.java)
 
     @Provides @Singleton
+    fun notificacoesApi(@Named("auth") client: OkHttpClient): br.com.condovitta.app.data.remote.NotificacoesApi =
+        retrofit(client).create(br.com.condovitta.app.data.remote.NotificacoesApi::class.java)
+
+    @Provides @Singleton
+    fun rotinaApi(@Named("auth") client: OkHttpClient): br.com.condovitta.app.data.remote.RotinaApi =
+        retrofit(client).create(br.com.condovitta.app.data.remote.RotinaApi::class.java)
+
+    @Provides @Singleton
     fun condovittaApi(@Named("auth") client: OkHttpClient): CondovittaApi = retrofit(client).create(CondovittaApi::class.java)
 }

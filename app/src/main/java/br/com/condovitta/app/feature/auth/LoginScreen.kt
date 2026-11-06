@@ -70,6 +70,8 @@ fun LoginScreen(dark: Boolean, lastEnd: SessionEnd?, vm: LoginViewModel = hiltVi
     val focus = LocalFocusManager.current
     var showPass by rememberSaveable { mutableStateOf(false) }
     var forgotOpen by rememberSaveable { mutableStateOf(false) }
+    // o login voltou (saiu da conta, passou o turno): começa do zero
+    androidx.compose.runtime.LaunchedEffect(Unit) { vm.reiniciar() }
 
     Column(
         Modifier

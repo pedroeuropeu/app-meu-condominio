@@ -90,8 +90,8 @@ O app nativo fica em [`app/`](app/), no mesmo padrão do e-Finances. Plano compl
 | 1 · Portaria | Painel do turno com busca, visitantes e acesso (liberar/saída/recusar com Desfazer), nova visita, bloqueados, encomendas com foto e entrega com código + assinatura | ✅ |
 | 2 · Morador | Início (boleto do mês, pergunta da portaria), boletos (Pix copia e cola, QR, PDF, composição), visitantes (pré-autorizar, recorrente, código para compartilhar, revogar), encomendas (código, quem pode retirar), avisos com ciência | ✅ |
 | 3 · Reservas | Minhas reservas e catálogo de áreas; assistente em 4 passos (espaço, calendário de disponibilidade, horário e convidados, termo com assinatura desenhada ou digitada); cancelar com Desfazer; portaria com reservas de hoje, check-in de convidados e chave; leitor de QR do visitante | ✅ |
-| 4 · Push e mais | FCM (depende do backend), livro, gás, veículos, minha unidade | próxima |
-| 5 · Loja | Ícone, capturas, AAB assinado, teste interno | |
+| 4 · Notificações e mais | Central de notificações com contador no sino, aviso na barra do Android por consulta periódica (30 s com o app aberto, 15 min em segundo plano) abrindo a tela certa; livro da portaria, veículos e placas, leitura de gás; minha unidade (pets e funcionários) | ✅ (FCM depois) |
+| 5 · Loja | Ícone, capturas, AAB assinado, teste interno | próxima |
 
 ### Flavors
 | Flavor | Pacote | Dados |
@@ -112,4 +112,5 @@ JDK 17+ (o CI usa 21). Emulador: `~/Library/Android/sdk/emulator/emulator -avd e
   login vazio para o próximo porteiro).
 - **Quem entra em qual modo:** Portaria = papéis que operam a portaria no backend (PORTARIA, SÍNDICO, ADMINISTRAÇÃO);
   Morador = MORADOR, ou SÍNDICO/CONSELHO com unidade. Mais de um perfil → "Como você quer entrar?", lembrado no aparelho.
-- **Push (FCM):** fase 4 (precisa de endpoints novos no backend).
+- **Notificações sem Firebase por enquanto:** o app consulta `/api/v1/notificacoes` a cada 30 s com o app aberto e a cada
+  15 min em segundo plano (WorkManager). O FCM entra depois, só para o aviso instantâneo com o app fechado.

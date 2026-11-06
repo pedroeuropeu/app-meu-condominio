@@ -167,6 +167,8 @@ dependencies {
     implementation(libs.timber)
     // leitor de QR do visitante (Google Code Scanner: sem permissão de câmera no app)
     implementation(libs.play.services.code.scanner)
+    // notificações por consulta periódica em segundo plano (a cada 15 min; o FCM entra depois)
+    implementation(libs.androidx.work.runtime)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

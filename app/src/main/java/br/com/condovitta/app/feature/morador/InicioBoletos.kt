@@ -83,13 +83,14 @@ data class MoradorNav(
     val abaBoletos: () -> Unit,
     val abaReservas: () -> Unit,
     val soon: (String) -> Unit,
-    val back: () -> Unit
+    val back: () -> Unit,
+    val notificacoes: () -> Unit = {}
 )
 
 /* ------------------------------------------------------------------ Início */
 
 @Composable
-fun InicioScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: MoradorNav, messenger: Messenger, vm: InicioViewModel = hiltViewModel(), boletosVm: BoletosViewModel = hiltViewModel()) {
+fun InicioScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: MoradorNav, messenger: Messenger, naoLidas: Long = 0, vm: InicioViewModel = hiltViewModel(), boletosVm: BoletosViewModel = hiltViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val qr by boletosVm.qr.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -106,7 +107,7 @@ fun InicioScreen(me: Me, perfil: Perfil, padding: PaddingValues, nav: MoradorNav
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             GreetingHero(
                 me.iniciais, saudacao(java.time.LocalTime.now().hour), me.primeiroNome,
-                listOfNotNull(perfil.unidade, perfil.condominioNome).joinToString(" · "), onBell = { nav.soon("app/notifs") }
+                listOfNotNull(perfil.unidade, perfil.condominioNome).joinToString(" · "), onBell = nav.notificacoes, naoLidas = naoLidas
             )
             Column(Modifier.padding(horizontal = 16.dp)) {
                 val d = state.data

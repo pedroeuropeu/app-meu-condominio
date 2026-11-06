@@ -51,9 +51,12 @@ data class Tab(val route: Any, val label: String, val icon: ImageVector, val sel
 fun ModeShell(
     tabs: List<Tab>,
     tag: String,
+    /** roda com o controlador de navegação (ex.: abrir a tela pedida por uma notificação) */
+    efeito: @Composable (NavHostController) -> Unit = {},
     graph: NavGraphBuilder.(nav: NavHostController, padding: PaddingValues) -> Unit
 ) {
     val nav = rememberNavController()
+    efeito(nav)
     val entry by nav.currentBackStackEntryAsState()
     val dest = entry?.destination
     val onTab = tabs.any { t -> dest?.hierarchy?.any { it.hasRoute(t.routeClass) } == true }

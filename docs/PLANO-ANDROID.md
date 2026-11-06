@@ -89,7 +89,7 @@ no debug com `Authorization` mascarado; R8 no release.
 | **1 · Portaria** ✅ | Painel do turno, busca (morador/unidade/placa), visitantes e acesso (liberar/saída/desfazer), nova visita, bloqueados, encomendas (registrar com CameraX → código de retirada, entregar, desfazer) | Porteiro faz o turno inteiro de visitas e encomendas pelo app, e a web reflete |
 | **2 · Morador** ✅ | Início, boletos (Pix copia-e-cola, QR, PDF), visitantes (pré-autorizar, QR para compartilhar, responder consulta da portaria), encomendas, avisos com ciência | Morador vê e paga o boleto e autoriza visitas sem abrir a web |
 | **3 · Reservas** ✅ | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
-| **4 · Push e mais** | FCM (depende do backend), notificações, livro da portaria, gás, veículos, minha unidade | Encomenda registrada vibra no celular do morador |
+| **4 · Push e mais** ✅ (sem FCM) | FCM (depende do backend), notificações, livro da portaria, gás, veículos, minha unidade | Encomenda registrada vibra no celular do morador |
 | **5 · Loja** | Ícone, capturas, `store/play-console.md`, teste interno, AAB assinado | Teste interno publicado |
 Depois: chamados, documentos/assinatura, assembleias/plenário, prestação de contas, ocorrências (módulo a módulo).
 
@@ -97,7 +97,8 @@ Depois: chamados, documentos/assinatura, assembleias/plenário, prestação de c
 - `applicationId` → `br.com.condovitta.app`. Produção: `https://meucondominio.efinances.top/` (API + Keycloak em `/auth`),
   o mesmo domínio do deploy do gestao-condominio; trocável com `-Pcondovitta.prodUrl=...`.
 - Portaria em aparelho compartilhado: **sessão longa, sem biometria e "Passar o turno"** em Mais (decidido em 2026-11-05).
-- Push (FCM): **fase 4**, como no plano (decidido em 2026-11-05).
+- Push: **sem Firebase por enquanto** (decidido em 2026-11-05). O app consulta o sino a cada 30 s aberto e a cada 15 min
+  em segundo plano e mostra a notificação local; FCM depois, para avisar na hora com o app fechado.
 - Quem entra na Portaria: os papéis de `PapelEnum.OPERACAO` do backend (PORTARIA, SÍNDICO, ADMINISTRAÇÃO).
 - Idiomas: só pt-BR por enquanto.
 

@@ -34,9 +34,16 @@ import br.com.condovitta.app.ui.soon
 
 /** App do morador (completo): Início, Reservas, Boletos e Mais, nas cores da marca. */
 @Composable
-fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger) {
+fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger, extras: br.com.condovitta.app.ui.ModoExtras = br.com.condovitta.app.ui.ModoExtras()) {
     ModeShell(
         tag = "modo_morador",
+        efeito = { nav ->
+            androidx.compose.runtime.LaunchedEffect(extras.destino) {
+                val d = extras.destino ?: return@LaunchedEffect
+                extras.consumirDestino()
+                abrirMorador(d, nav)
+            }
+        },
         tabs = listOf(
             Tab(AppInicio, "Início", Icons.Outlined.Home, Icons.Rounded.Home),
             Tab(AppReservas, "Reservas", Icons.Outlined.CalendarMonth, Icons.Rounded.CalendarMonth),
@@ -62,12 +69,15 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger) 
                     "app/visitantes" -> nav.navigate(AppVisitantes)
                     "app/encomendas" -> nav.navigate(AppEncomendas)
                     "app/avisos" -> nav.navigate(AppAvisos)
+                    "app/unidade" -> nav.navigate(br.com.condovitta.app.ui.navigation.MinhaUnidadeRoute)
+                    "app/notifs" -> nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute)
                     else -> nav.soon(key)
                 }
             },
-            back = { nav.popBackStack() }
+            back = { nav.popBackStack() },
+            notificacoes = { nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute) }
         )
-        composable<AppInicio> { InicioScreen(me, perfil, padding, mnav, messenger) }
+        composable<AppInicio> { InicioScreen(me, perfil, padding, mnav, messenger, extras.naoLidas) }
         composable<AppReservas> { ReservasScreen(padding, onReservar = { nav.navigate(NovaReservaRoute(it)) }) }
         composable<AppBoletos> { BoletosScreen(padding, messenger) }
         composable<AppMais> { MaisScreen(me, perfil, mais, padding, onSoon = mnav.soon) }
@@ -76,6 +86,27 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger) 
         composable<AutorizacaoDetalhe> { AutorizacaoScreen(mnav, perfil.condominioNome, perfil.unidade) }
         composable<AppEncomendas> { EncomendasMoradorScreen(mnav) }
         composable<AppAvisos> { AvisosScreen(mnav) }
+        composable<br.com.condovitta.app.ui.navigation.MinhaUnidadeRoute> { br.com.condovitta.app.feature.rotina.MinhaUnidadeScreen(onBack = mnav.back) }
+        composable<br.com.condovitta.app.ui.navigation.NotificacoesRoute> {
+            br.com.condovitta.app.feature.notificacoes.NotificacoesScreen(onBack = mnav.back, onAbrir = { d -> abrirMorador(d, nav) })
+        }
         composable<NovaReservaRoute> { NovaReservaScreen(onBack = { nav.popBackStack() }, onConcluir = { nav.popBackStack() }) }
+    }
+}
+
+/** Tela do morador para cada destino de notificação. */
+internal fun abrirMorador(d: br.com.condovitta.app.domain.Destino, nav: androidx.navigation.NavHostController) {
+    fun tab(route: Any) = nav.navigate(route) {
+        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+    when (d) {
+        br.com.condovitta.app.domain.Destino.ENCOMENDAS -> nav.navigate(AppEncomendas)
+        br.com.condovitta.app.domain.Destino.VISITANTES -> nav.navigate(AppVisitantes)
+        br.com.condovitta.app.domain.Destino.BOLETOS -> tab(AppBoletos)
+        br.com.condovitta.app.domain.Destino.RESERVAS -> tab(AppReservas)
+        br.com.condovitta.app.domain.Destino.AVISOS -> nav.navigate(AppAvisos)
+        else -> nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute)
     }
 }

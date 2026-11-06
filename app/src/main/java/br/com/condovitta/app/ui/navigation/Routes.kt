@@ -103,3 +103,10 @@ object SoonCatalog {
 /* Reservas (fase 3) */
 @Serializable data class NovaReservaRoute(val areaId: Long)
 @Serializable data object PortReservasRoute
+
+/* Fase 4 */
+@Serializable data object NotificacoesRoute
+@Serializable data object LivroRoute
+@Serializable data object VeiculosRoute
+@Serializable data object GasRoute
+@Serializable data object MinhaUnidadeRoute

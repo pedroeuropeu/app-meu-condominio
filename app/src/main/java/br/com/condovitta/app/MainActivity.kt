@@ -20,6 +20,7 @@ class MainActivity : FragmentActivity() {
 
     @Inject lateinit var lockCoordinator: LockCoordinator
     @Inject lateinit var messenger: Messenger
+    @Inject lateinit var navRequests: br.com.condovitta.app.ui.NavRequests
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
@@ -31,6 +32,8 @@ class MainActivity : FragmentActivity() {
         if (!BuildConfig.DEBUG) window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
 
         lockCoordinator.reportDeviceLock(canUseDeviceLock(this))
+        br.com.condovitta.app.core.notify.Exibidor.criarCanais(this)
+        if (savedInstanceState == null) abrirDaNotificacao(intent)
         splash.setKeepOnScreenCondition { !lockCoordinator.ready.value }
 
         setContent {
@@ -41,5 +44,16 @@ class MainActivity : FragmentActivity() {
                 onUnlock = { showUnlockPrompt(this, onSuccess = { lockCoordinator.unlock() }, onError = { messenger.show(it) }) }
             )
         }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        abrirDaNotificacao(intent)
+    }
+
+    /** tocou numa notificação: guarda a tela pedida (o modo em uso navega quando estiver pronto) */
+    private fun abrirDaNotificacao(intent: android.content.Intent?) {
+        val categoria = intent?.getStringExtra(br.com.condovitta.app.core.notify.Exibidor.EXTRA_CATEGORIA) ?: return
+        navRequests.abrir(intent.getStringExtra(br.com.condovitta.app.core.notify.Exibidor.EXTRA_ROTA), categoria)
     }
 }

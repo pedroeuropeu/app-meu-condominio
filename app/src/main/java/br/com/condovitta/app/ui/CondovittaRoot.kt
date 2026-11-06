@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import br.com.condovitta.app.core.designsystem.CondovittaTheme
 import br.com.condovitta.app.core.designsystem.Emblem
 import br.com.condovitta.app.core.designsystem.ext
@@ -65,13 +66,15 @@ fun CondovittaRoot(
     locked: StateFlow<Boolean>,
     deviceLockAvailable: () -> Boolean,
     onUnlock: () -> Unit,
-    vm: SessionViewModel = hiltViewModel()
+    vm: SessionViewModel = hiltViewModel(),
+    sino: SinoViewModel = hiltViewModel()
 ) {
     val session by vm.session.collectAsStateWithLifecycle()
     val contexto by vm.contexto.collectAsStateWithLifecycle()
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     val lastEnd by vm.lastEnd.collectAsStateWithLifecycle()
     val isLocked by locked.collectAsStateWithLifecycle()
+    LaunchedEffect(session) { if (session is SessionState.LoggedOut) sino.desativar() }
 
     val dark = when (prefs.theme) {
         ThemeMode.SISTEMA -> isSystemInDarkTheme()
@@ -126,7 +129,12 @@ fun CondovittaRoot(
                                 onSair = { vm.sair() },
                                 onPassarTurno = { vm.sair(SessionEnd.TURNO_PASSADO) }
                             )
-                            if (perfil.modo == Modo.PORTARIA) PortariaApp(r.me, perfil, actions, messenger) else MoradorApp(r.me, perfil, actions, messenger)
+                            ModoAtivo(sino)
+                            val naoLidas by sino.naoLidas.collectAsStateWithLifecycle()
+                            val destino by sino.destino.collectAsStateWithLifecycle()
+                            val extras = ModoExtras(naoLidas, destino) { sino.consumirDestino() }
+                            if (perfil.modo == Modo.PORTARIA) PortariaApp(r.me, perfil, actions, messenger, extras)
+                            else MoradorApp(r.me, perfil, actions, messenger, extras)
                         }
                     }
                 }
@@ -158,6 +166,31 @@ private fun LockOverlay(onUnlock: () -> Unit) {
                 Icon(Icons.Rounded.Lock, contentDescription = null)
                 Spacer(Modifier.padding(4.dp))
                 Text("Desbloquear")
+            }
+        }
+    }
+}
+
+/**
+ * Enquanto um modo está na tela: agenda a consulta em segundo plano, pede a permissão de notificação (Android 13+, uma
+ * vez) e consulta o sino a cada 30 s com o app aberto.
+ */
+@Composable
+private fun ModoAtivo(sino: SinoViewModel) {
+    val permissao = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(Unit) {
+        sino.ativar()
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !sino.jaPediuPermissao()) {
+            sino.marcarPediuPermissao()
+            permissao.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.RESUMED) {
+            while (true) {
+                sino.sincronizar()
+                kotlinx.coroutines.delay(30_000)
             }
         }
     }

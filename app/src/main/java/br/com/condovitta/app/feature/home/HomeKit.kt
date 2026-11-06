@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +45,7 @@ fun saudacao(hora: Int): String = when (hora) {
 
 /** Topo das telas iniciais: avatar, saudação, condomínio e o sino. */
 @Composable
-fun GreetingHero(initials: String, kicker: String, name: String, subtitle: String, onBell: () -> Unit, extra: @Composable () -> Unit = {}) {
+fun GreetingHero(initials: String, kicker: String, name: String, subtitle: String, onBell: () -> Unit, naoLidas: Long = 0, extra: @Composable () -> Unit = {}) {
     Hero {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Avatar(initials)
@@ -52,8 +54,10 @@ fun GreetingHero(initials: String, kicker: String, name: String, subtitle: Strin
                 Text("Olá, $name", style = MaterialTheme.typography.headlineSmall, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.75f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            IconButton(onClick = onBell, modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.16f))) {
-                Icon(Icons.Rounded.Notifications, contentDescription = "Notificações", tint = Color.White)
+            BadgedBox(badge = { if (naoLidas > 0) Badge { Text(if (naoLidas > 9) "9+" else "$naoLidas") } }) {
+                IconButton(onClick = onBell, modifier = Modifier.clip(CircleShape).background(Color.White.copy(alpha = 0.16f))) {
+                    Icon(Icons.Rounded.Notifications, contentDescription = if (naoLidas > 0) "Notificações, $naoLidas não lidas" else "Notificações", tint = Color.White)
+                }
             }
         }
         extra()

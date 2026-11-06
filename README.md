@@ -13,7 +13,7 @@ gestão de condomínios ([`../gestao-condominio`](../gestao-condominio)), no mes
 | Azul da marca (ação principal) | `#0A62B8` |
 | Verde-água ("vitta", destaque) | `#01B6A3` |
 | Arco do emblema (degradê) | `#1062C4 → #05A8AA → #1BE79A` |
-| Portaria (acento de função, não é marca) | âmbar `#E59008` |
+| Portaria (função, não é marca) | cabeçalho escuro `#111827` e azul único `#2563EB` nos ícones e botões |
 
 Títulos em **Lexend**, texto em Inter. Arquivos em `prototype/`: `logo-condovitta.png` (com slogan),
 `logo-condovitta-compacta.png` (sem slogan), as versões `-escuro` (texto branco, para fundo escuro) e o emblema
@@ -29,18 +29,19 @@ O protótipo aprovado fica em [`prototype/`](prototype/) (HTML navegável, sem d
 
 O app atende dois papéis bem diferentes do condomínio, e o protótipo deixa escolher qual ver na tela de entrada:
 
-### 🛡️ Modo Portaria (rápido)
-Pensado para o porteiro ganhar **agilidade** no balcão. Tudo em acento âmbar para separar da visão do morador.
+### 🛡️ Modo Portaria (simples)
+Pensado para o porteiro ganhar **agilidade** no balcão: tela limpa, botões grandes e poucas opções. Cabeçalho escuro e
+um azul só, separado do app do morador. Sem barra inferior: o Início é o ponto de partida e o menu do cabeçalho guarda o
+resto. Não tem as opções do morador (tema, digital).
 
 | Tela | O que faz |
 |---|---|
-| **Painel do turno** | Saudação do porteiro, busca grande (morador, unidade **ou placa**), números do turno (esperados, no condomínio, encomendas) e **ações de 1 toque** |
-| **Registrar encomenda** | O fluxo-estrela: unidade → transportadora (chips) → foto → onde guardar → gera o **código de retirada** e avisa o morador (app + push) |
-| **Visitantes e acesso** | Esperados, quem está no condomínio e histórico do dia; **liberar entrada** / **registrar saída** em um toque; lista de bloqueados |
+| **Início** | Busca grande (morador, unidade, placa **ou QR**) e **6 botões**: registrar encomenda, entregar, nova visita, esperados, no condomínio e livro, com os contadores do turno |
+| **Registrar encomenda** | 2 passos: a unidade no **teclado** (bloco + número, confere o morador) → foto e transportadora. Gera o **código de retirada** e avisa o morador |
+| **Visitantes** | Esperados / Dentro / Saíram; **Liberar** e **Saída** na própria linha, com Desfazer. Ao liberar, a portaria pode **tirar a foto** de quem entrou |
 | **Nova visita** | Cadastro rápido de quem chegou sem pré-autorização, libera e avisa o morador |
 | **Encomendas** | Aguardando retirada e retiradas de hoje; entrega com código + assinatura |
-| **Reservas de hoje** | Lista de convidados na portaria, check-in e controle de chave |
-| **Mais** | Livro da portaria, leitura de gás, veículos e placas, trocar de perfil |
+| **Menu** | Reservas de hoje, veículos e placas, leitura de gás, bloqueados, notificações, trocar de perfil e passar o turno |
 
 ### 🏢 App do morador (completo)
 A visão do morador, nas cores da marca (azul-marinho, azul e verde-água).
@@ -105,6 +106,8 @@ O app nativo fica em [`app/`](app/), no mesmo padrão do e-Finances. Plano compl
 ./gradlew assembleDemoDebug          # APK de demonstração
 ./gradlew testDemoDebugUnitTest      # testes unitários
 scripts/local-dev.sh                 # instala o flavor local ligado ao backend desta máquina
+# contrato com o backend local (entra com os usuários de dev e chama cada leitura do app):
+CONDOVITTA_LOCAL=1 ./gradlew :app:testProdDebugUnitTest --tests '*BackendLocalTest*'
 ```
 JDK 17+ (o CI usa 21). Emulador: `~/Library/Android/sdk/emulator/emulator -avd efinances_pixel8`.
 

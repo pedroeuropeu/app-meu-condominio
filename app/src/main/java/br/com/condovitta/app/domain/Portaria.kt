@@ -188,6 +188,24 @@ object Portaria {
     /** encomenda parada: muitos avisos sem retirada */
     fun atrasada(e: Encomenda) = !e.retirada && e.avisos >= 3
 
+    private fun normalizar(s: String?): String =
+        java.text.Normalizer.normalize(s.orEmpty(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "").lowercase().filter { it.isLetterOrDigit() || it == ' ' }
+
+    /**
+     * Busca rápida da lista de encomendas: cada palavra digitada precisa aparecer na unidade ("c305", "305", "C-305"),
+     * no destinatário, na transportadora, no local, no rastreio ou em quem retirou. Sem acento e sem diferença de caixa.
+     */
+    fun filtrarEncomendas(lista: List<Encomenda>, busca: String): List<Encomenda> {
+        val termos = normalizar(busca).split(' ').filter { it.isNotBlank() }
+        if (termos.isEmpty()) return lista
+        return lista.filter { e ->
+            val unidade = normalizar(e.unidade).replace(" ", "")
+            val texto = listOf(e.destinatario, e.transportadora, e.local, e.rastreio, e.retiradaPor, e.tamanho?.label)
+                .joinToString(" ") { normalizar(it) }
+            termos.all { t -> unidade.contains(t) || texto.contains(t) }
+        }
+    }
+
     /** número da unidade sem o bloco: "B-204" → "204", "Apto 12" → "12" */
     fun numeroDa(u: UnidadeResumo): String = u.rotulo.substringAfterLast('-').filter { it.isLetterOrDigit() }.let { r ->
         if (r.any { it.isDigit() } && r.any { it.isLetter() } && '-' !in u.rotulo) r.filter { it.isDigit() } else r

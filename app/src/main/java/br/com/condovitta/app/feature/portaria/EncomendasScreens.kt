@@ -1,5 +1,10 @@
 package br.com.condovitta.app.feature.portaria
 
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.shape.RoundedCornerShape
 import android.net.Uri
@@ -102,6 +107,7 @@ import kotlinx.coroutines.withContext
 fun EncomendasScreen(nav: PortariaNav, vm: EncomendasViewModel = hiltViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val filtro by vm.filtro.collectAsStateWithLifecycle()
+    var busca by rememberSaveable { mutableStateOf("") }
     LifecycleResumeEffect(Unit) {
         vm.refresh()
         onPauseOrDispose { }
@@ -121,6 +127,23 @@ fun EncomendasScreen(nav: PortariaNav, vm: EncomendasViewModel = hiltViewModel()
         PullToRefreshBox(isRefreshing = state.loading && d != null, onRefresh = vm::refresh, modifier = Modifier.padding(p).fillMaxSize()) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp)) {
                 item {
+                    // busca rápida: filtra a lista na hora (unidade, morador, transportadora, local, rastreio)
+                    OutlinedTextField(
+                        value = busca, onValueChange = { busca = it.take(60) },
+                        placeholder = { Text("Unidade, morador ou transportadora") },
+                        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+                        trailingIcon = { if (busca.isNotEmpty()) IconButton(onClick = { busca = "" }) { Icon(Icons.Rounded.Close, contentDescription = "Limpar busca") } },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.ext.card, unfocusedContainerColor = MaterialTheme.ext.card,
+                            unfocusedBorderColor = MaterialTheme.ext.cardBorder
+                        ),
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp).testTag("encomendas_busca")
+                    )
+                }
+                item {
                     FilterChips(
                         listOf(
                             FiltroEncomendas.AGUARDANDO to "Aguardando retirada" + (d?.aguardando?.size?.let { " · $it" } ?: ""),
@@ -134,8 +157,14 @@ fun EncomendasScreen(nav: PortariaNav, vm: EncomendasViewModel = hiltViewModel()
                     d == null && state.loading -> item { LoadingBox() }
                     d == null -> item { ErrorBox(state.error ?: "Não deu para carregar.", onRetry = vm::refresh) }
                     else -> {
-                        val list = if (filtro == FiltroEncomendas.AGUARDANDO) d.aguardando else d.entregues
-                        if (list.isEmpty()) item {
+                        val list = Portaria.filtrarEncomendas(if (filtro == FiltroEncomendas.AGUARDANDO) d.aguardando else d.entregues, busca)
+                        if (list.isEmpty() && busca.isNotBlank()) item {
+                            val outra = Portaria.filtrarEncomendas(if (filtro == FiltroEncomendas.AGUARDANDO) d.entregues else d.aguardando, busca).size
+                            EmptyBox(
+                                Icons.Rounded.Search, "Nada com \"${busca.trim()}\"",
+                                if (outra > 0) "Há $outra em \"${if (filtro == FiltroEncomendas.AGUARDANDO) "Retiradas hoje" else "Aguardando retirada"}\"." else "Confira a unidade ou o nome do morador."
+                            )
+                        } else if (list.isEmpty()) item {
                             EmptyBox(Icons.Rounded.Inventory2, if (filtro == FiltroEncomendas.AGUARDANDO) "Tudo entregue" else "Nenhuma retirada hoje", "Nenhuma encomenda neste filtro.")
                         } else item {
                             Spacer(Modifier.height(8.dp))

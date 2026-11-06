@@ -65,6 +65,17 @@ class PortariaSimplesTest {
         assertThat(Portaria.numeroDa(unidades[1])).isEqualTo("204")
     }
 
+    @Test fun `busca rapida de encomendas por unidade, morador e transportadora`() = runTest {
+        val lista = (DemoPortariaRepository(time).encomendas() as Outcome.Ok).value.aguardando
+        val b204 = lista.first { it.unidade == "B-204" }
+        assertThat(Portaria.filtrarEncomendas(lista, "b204")).contains(b204)
+        assertThat(Portaria.filtrarEncomendas(lista, "B-204").all { it.unidade == "B-204" }).isTrue()
+        assertThat(Portaria.filtrarEncomendas(lista, b204.transportadora.lowercase())).contains(b204)
+        b204.destinatario?.let { nome -> assertThat(Portaria.filtrarEncomendas(lista, nome.substringBefore(' ').uppercase())).contains(b204) }
+        assertThat(Portaria.filtrarEncomendas(lista, "  ")).isEqualTo(lista)
+        assertThat(Portaria.filtrarEncomendas(lista, "zzzz-nada")).isEmpty()
+    }
+
     @Test fun `foto do acesso vai em multipart e volta com temFoto`() = runTest {
         server.enqueue(MockResponse().setBody("""{"visitanteId":7,"acessoId":507,"nome":"Rafael Torres","status":"dentro","temFoto":true}"""))
         val v = (remote().fotoAcesso(507, byteArrayOf(9, 8, 7)) as Outcome.Ok).value

@@ -55,7 +55,7 @@ A visão do morador, nas cores da marca (azul-marinho, azul e verde-água).
 | **Avisos** | Mural do condomínio com confirmação de leitura |
 | **Mais** | Grade de serviços (documentos, chamados, gás, assembleias, prestação de contas, ocorrências, unidade, calendário) e perfil |
 
-As telas ainda não detalhadas aparecem com um estado **"Em construção"** honesto — a ideia é ir fechando módulo a módulo.
+No app do morador todas as telas do menu Mais já funcionam; o estado **"Em construção"** fica só para o que ainda não existir.
 
 ## Padrões (herdados do e-Finances e da web)
 - **Sem toast:** feedback por snackbar (com Desfazer quando faz sentido), erro no lugar do formulário.
@@ -91,7 +91,8 @@ O app nativo fica em [`app/`](app/), no mesmo padrão do e-Finances. Plano compl
 | 2 · Morador | Início (boleto do mês, pergunta da portaria), boletos (Pix copia e cola, QR, PDF, composição), visitantes (pré-autorizar, recorrente, código para compartilhar, revogar), encomendas (código, quem pode retirar), avisos com ciência | ✅ |
 | 3 · Reservas | Minhas reservas e catálogo de áreas; assistente em 4 passos (espaço, calendário de disponibilidade, horário e convidados, termo com assinatura desenhada ou digitada); cancelar com Desfazer; portaria com reservas de hoje, check-in de convidados e chave; leitor de QR do visitante | ✅ |
 | 4 · Notificações e mais | Central de notificações com contador no sino, aviso na barra do Android por consulta periódica (30 s com o app aberto, 15 min em segundo plano) abrindo a tela certa; livro da portaria, veículos e placas, leitura de gás; minha unidade (pets e funcionários) | ✅ (FCM depois) |
-| 5 · Loja | Ícone, capturas, AAB assinado, teste interno | próxima |
+| 5 · Serviços do morador | Chamados (conversa, fotos, avaliação), ocorrências (registro, defesa no prazo, decisão), documentos para assinar (desenho + código por e-mail, evidências), assembleias e plenário ao vivo (presença, voto, palavra, chat, procuração), prestação de contas, consumo de gás e calendário (lembrete e agenda) | ✅ |
+| 6 · Loja | Ícone, capturas, AAB assinado, teste interno | adiada |
 
 ### Flavors
 | Flavor | Pacote | Dados |

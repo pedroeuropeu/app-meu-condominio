@@ -31,6 +31,30 @@ import br.com.condovitta.app.ui.navigation.NovaReservaRoute
 import br.com.condovitta.app.feature.reservas.NovaReservaScreen
 import br.com.condovitta.app.feature.reservas.ReservasScreen
 import br.com.condovitta.app.ui.soon
+import br.com.condovitta.app.feature.servicos.AssembleiasScreen
+import br.com.condovitta.app.feature.servicos.CalendarioScreen
+import br.com.condovitta.app.feature.servicos.ChamadoScreen
+import br.com.condovitta.app.feature.servicos.ChamadosScreen
+import br.com.condovitta.app.feature.servicos.DocumentoScreen
+import br.com.condovitta.app.feature.servicos.DocumentosScreen
+import br.com.condovitta.app.feature.servicos.GasMoradorScreen
+import br.com.condovitta.app.feature.servicos.NovaOcorrenciaScreen
+import br.com.condovitta.app.feature.servicos.NovoChamadoScreen
+import br.com.condovitta.app.feature.servicos.OcorrenciasScreen
+import br.com.condovitta.app.feature.servicos.PlenarioScreen
+import br.com.condovitta.app.feature.servicos.PrestacaoScreen
+import br.com.condovitta.app.ui.navigation.AssembleiasRoute
+import br.com.condovitta.app.ui.navigation.CalendarioRoute
+import br.com.condovitta.app.ui.navigation.ChamadoRoute
+import br.com.condovitta.app.ui.navigation.ChamadosRoute
+import br.com.condovitta.app.ui.navigation.DocumentoRoute
+import br.com.condovitta.app.ui.navigation.DocumentosRoute
+import br.com.condovitta.app.ui.navigation.GasMoradorRoute
+import br.com.condovitta.app.ui.navigation.NovaOcorrenciaRoute
+import br.com.condovitta.app.ui.navigation.NovoChamadoRoute
+import br.com.condovitta.app.ui.navigation.OcorrenciasRoute
+import br.com.condovitta.app.ui.navigation.PlenarioRoute
+import br.com.condovitta.app.ui.navigation.PrestacaoRoute
 
 /** App do morador (completo): Início, Reservas, Boletos e Mais, nas cores da marca. */
 @Composable
@@ -71,6 +95,13 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger, 
                     "app/avisos" -> nav.navigate(AppAvisos)
                     "app/unidade" -> nav.navigate(br.com.condovitta.app.ui.navigation.MinhaUnidadeRoute)
                     "app/notifs" -> nav.navigate(br.com.condovitta.app.ui.navigation.NotificacoesRoute)
+                    "app/chamados" -> nav.navigate(ChamadosRoute)
+                    "app/ocorrencias" -> nav.navigate(OcorrenciasRoute)
+                    "app/documentos" -> nav.navigate(DocumentosRoute)
+                    "app/assembleias" -> nav.navigate(AssembleiasRoute)
+                    "app/prestacao" -> nav.navigate(PrestacaoRoute)
+                    "app/gas" -> nav.navigate(GasMoradorRoute)
+                    "app/calendario" -> nav.navigate(CalendarioRoute)
                     else -> nav.soon(key)
                 }
             },
@@ -91,6 +122,22 @@ fun MoradorApp(me: Me, perfil: Perfil, mais: MaisActions, messenger: Messenger, 
             br.com.condovitta.app.feature.notificacoes.NotificacoesScreen(onBack = mnav.back, onAbrir = { d -> abrirMorador(d, nav) })
         }
         composable<NovaReservaRoute> { NovaReservaScreen(onBack = { nav.popBackStack() }, onConcluir = { nav.popBackStack() }) }
+
+        // serviços do morador
+        composable<ChamadosRoute> { ChamadosScreen(onBack = mnav.back, onAbrir = { nav.navigate(ChamadoRoute(it)) }, onNovo = { nav.navigate(NovoChamadoRoute) }) }
+        composable<NovoChamadoRoute> {
+            NovoChamadoScreen(onBack = mnav.back, onCriado = { id -> nav.navigate(ChamadoRoute(id)) { popUpTo<NovoChamadoRoute> { inclusive = true } } })
+        }
+        composable<ChamadoRoute> { ChamadoScreen(onBack = mnav.back) }
+        composable<OcorrenciasRoute> { OcorrenciasScreen(onBack = mnav.back, onNova = { nav.navigate(NovaOcorrenciaRoute) }) }
+        composable<NovaOcorrenciaRoute> { NovaOcorrenciaScreen(onBack = mnav.back) }
+        composable<DocumentosRoute> { DocumentosScreen(onBack = mnav.back, onAbrir = { nav.navigate(DocumentoRoute(it)) }) }
+        composable<DocumentoRoute> { DocumentoScreen(onBack = mnav.back) }
+        composable<AssembleiasRoute> { AssembleiasScreen(onBack = mnav.back, onPlenario = { nav.navigate(PlenarioRoute(it)) }) }
+        composable<PlenarioRoute> { PlenarioScreen(onBack = mnav.back) }
+        composable<PrestacaoRoute> { PrestacaoScreen(onBack = mnav.back) }
+        composable<GasMoradorRoute> { GasMoradorScreen(onBack = mnav.back) }
+        composable<CalendarioRoute> { CalendarioScreen(onBack = mnav.back) }
     }
 }
 

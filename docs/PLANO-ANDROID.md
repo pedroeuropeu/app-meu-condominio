@@ -90,8 +90,8 @@ no debug com `Authorization` mascarado; R8 no release.
 | **2 · Morador** ✅ | Início, boletos (Pix copia-e-cola, QR, PDF), visitantes (pré-autorizar, QR para compartilhar, responder consulta da portaria), encomendas, avisos com ciência | Morador vê e paga o boleto e autoriza visitas sem abrir a web |
 | **3 · Reservas** ✅ | Catálogo, assistente em 4 passos (mapa, calendário de disponibilidade, turno/convidados, termo com assinatura em Canvas), minhas reservas; Portaria: reservas de hoje e chaves; leitor de QR do visitante | Reserva criada no app aparece aprovada/pendente na web |
 | **4 · Push e mais** ✅ (sem FCM) | FCM (depende do backend), notificações, livro da portaria, gás, veículos, minha unidade | Encomenda registrada vibra no celular do morador |
-| **5 · Loja** | Ícone, capturas, `store/play-console.md`, teste interno, AAB assinado | Teste interno publicado |
-Depois: chamados, documentos/assinatura, assembleias/plenário, prestação de contas, ocorrências (módulo a módulo).
+| **5 · Serviços do morador** ✅ | Chamados, ocorrências, documentos/assinatura, assembleias/plenário, prestação de contas, consumo de gás, calendário | Nenhuma tela do morador em "Em construção" |
+| **6 · Loja** (adiada) | Ícone, capturas, `store/play-console.md`, teste interno, AAB assinado | Teste interno publicado |
 
 ## 7. Decisões
 - `applicationId` → `br.com.condovitta.app`. Produção: `https://meucondominio.efinances.top/` (API + Keycloak em `/auth`),

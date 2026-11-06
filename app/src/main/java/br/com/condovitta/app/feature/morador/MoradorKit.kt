@@ -72,12 +72,15 @@ import java.time.temporal.ChronoUnit
 /* ------------------------------------------------------------------ ações do sistema */
 
 /** Abre um PDF (boleto) no leitor do aparelho; o arquivo fica no cache e não vai para backup. */
-fun abrirPdf(context: Context, bytes: ByteArray, nome: String): Boolean = runCatching {
+fun abrirPdf(context: Context, bytes: ByteArray, nome: String): Boolean = abrirArquivo(context, bytes, nome, "application/pdf")
+
+/** Abre um arquivo baixado (PDF, foto, convite .ics...) no app do aparelho que souber mostrar. Fica no cache, fora do backup. */
+fun abrirArquivo(context: Context, bytes: ByteArray, nome: String, mime: String, titulo: String = "Abrir com"): Boolean = runCatching {
     val dir = File(context.cacheDir, "pdfs").apply { mkdirs() }
-    val file = File(dir, nome).apply { writeBytes(bytes) }
+    val file = File(dir, nome.replace(Regex("[^A-Za-z0-9._-]"), "_")).apply { writeBytes(bytes) }
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fotos", file)
     context.startActivity(
-        Intent.createChooser(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/pdf").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), "Abrir boleto")
+        Intent.createChooser(Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION), titulo)
     )
 }.isSuccess
 
